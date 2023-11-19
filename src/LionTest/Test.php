@@ -68,4 +68,19 @@ abstract class Test extends TestCase
             }
         }
     }
+
+    /**
+     * Generates a blank image with the defined properties
+     * */
+    public function createImage(
+        int $x = 100,
+        int $y = 100,
+        string $path = './storage/',
+        string $fileName = 'image.png'
+    ): void
+    {
+        $image = imagecreatetruecolor($x, $y);
+        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        imagepng($image, "{$path}{$fileName}");
+    }
 }

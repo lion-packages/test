@@ -9,13 +9,19 @@ use LionTest\Test;
 class TestTest extends Test
 {
     const BITS = 16;
+    const X = 200;
+    const Y = 150;
     const PROPIERTY = 'bits';
     const URL_PATH = './storage/example/';
+    const FILE_NAME = 'image.png';
+    const FILE_NAME_CUSTOM = 'custom.png';
 
     private mixed $customClass;
 
     protected function setUp(): void
     {
+        $this->createDirectory(self::URL_PATH);
+
         $this->customClass = new class {
             private int $bits;
 
@@ -24,6 +30,11 @@ class TestTest extends Test
                 $this->bits = $bits;
             }
         };
+    }
+
+    protected function tearDown(): void
+    {
+        $this->rmdirRecursively('./storage/');
     }
 
     public function testGetPrivateProperty(): void
@@ -47,5 +58,19 @@ class TestTest extends Test
         $this->createDirectory(self::URL_PATH);
 
         $this->assertTrue(is_dir(self::URL_PATH));
+    }
+
+    public function testCreateImageDefaultValues(): void
+    {
+        $this->createImage();
+
+        $this->assertFileExists('./storage/image.png');
+    }
+
+    public function testCreateImageCustomValues(): void
+    {
+        $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
+
+        $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
     }
 }
