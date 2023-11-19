@@ -1,0 +1,17 @@
+{
+    "name": "lion/test",
+    "description": "library to implement testing with helpers that allow easy testing with PHPUnit",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "LionTest\\": "src/LionTest/"
+        }
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.4"
+    }
+}
