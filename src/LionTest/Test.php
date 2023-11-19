@@ -16,7 +16,7 @@ abstract class Test extends TestCase
     /**
      * Initializes the object to perform a reflection on a class
      * */
-    protected function initReflection(mixed $instance): void
+    public function initReflection(mixed $instance): void
     {
         $this->instance = $instance;
         $this->reflectionClass = new ReflectionClass($this->instance);
@@ -25,7 +25,7 @@ abstract class Test extends TestCase
     /**
      * Gets the value of a private property of a class
      * */
-    protected function getPrivateProperty(string $property): mixed
+    public function getPrivateProperty(string $property): mixed
     {
         $customProperty = $this->reflectionClass->getProperty($property);
         $customProperty->setAccessible(true);
@@ -36,7 +36,7 @@ abstract class Test extends TestCase
     /**
      * Remove all files in a defined path
      * */
-    protected function rmdirRecursively(string $dir): void
+    public function rmdirRecursively(string $dir): void
     {
         if (is_dir($dir)) {
             $objects = scandir($dir);
@@ -60,7 +60,7 @@ abstract class Test extends TestCase
     /**
      * Create folders from a defined path
      * */
-    protected function createDirectory(string $directory): void
+    public function createDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
