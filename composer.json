@@ -8,6 +8,11 @@
             "LionTest\\": "src/LionTest/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "require": {
         "php": ">=8.2"
     },
