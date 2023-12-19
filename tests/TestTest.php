@@ -12,7 +12,8 @@ class TestTest extends Test
     const X = 200;
     const Y = 150;
     const PROPIERTY = 'bits';
-    const URL_PATH = './storage/example/';
+    const STORAGE = './storage/';
+    const URL_PATH = self::STORAGE . 'example/';
     const FILE_NAME = 'image.png';
     const FILE_NAME_CUSTOM = 'custom.png';
 
@@ -34,13 +35,21 @@ class TestTest extends Test
 
     protected function tearDown(): void
     {
-        $this->rmdirRecursively('./storage/');
+        $this->rmdirRecursively(self::STORAGE);
     }
 
     public function testGetPrivateProperty(): void
     {
         $this->initReflection($this->customClass);
         $this->customClass->setBits(self::BITS);
+
+        $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
+    }
+
+    public function testSetPrivateProperty(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty(self::PROPIERTY, self::BITS);
 
         $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
     }
@@ -64,7 +73,7 @@ class TestTest extends Test
     {
         $this->createImage();
 
-        $this->assertFileExists('./storage/image.png');
+        $this->assertFileExists(self::STORAGE . self::FILE_NAME);
     }
 
     public function testCreateImageCustomValues(): void

@@ -23,7 +23,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the value of a private property of a class
+     * Gets the value of a private or protected property of a class
      * */
     public function getPrivateProperty(string $property): mixed
     {
@@ -31,6 +31,16 @@ abstract class Test extends TestCase
         $customProperty->setAccessible(true);
 
         return $customProperty->getValue($this->instance);
+    }
+
+    /**
+     * Changes the value of a private or protected property of a class
+     * */
+    public function setPrivateProperty(string $property, mixed $value): void
+    {
+        $customProperty = $this->reflectionClass->getProperty($property);
+        $customProperty->setAccessible(true);
+        $customProperty->setValue($this->instance, $value);
     }
 
     /**
