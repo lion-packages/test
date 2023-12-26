@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use LionTest\Test;
+use ReflectionClass;
 
 class TestTest extends Test
 {
@@ -24,11 +25,28 @@ class TestTest extends Test
         $this->createDirectory(self::URL_PATH);
 
         $this->customClass = new class {
-            private int $bits;
+            private int $bits = 100;
 
             public function setBits(int $bits): void
             {
                 $this->bits = $bits;
+            }
+
+            private function getBits(): int
+            {
+                return $this->bits;
+            }
+
+            private function subtractBits(int $bits): void
+            {
+                $this->bits -= $bits;
+            }
+
+            private function resultBits(int $bits): int
+            {
+                $this->bits -= $bits;
+
+                return $this->getBits();
             }
         };
     }
@@ -36,6 +54,36 @@ class TestTest extends Test
     protected function tearDown(): void
     {
         $this->rmdirRecursively(self::STORAGE);
+    }
+
+    public function testGetPrivateMethod(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $bits = $this->getPrivateMethod('getBits');
+
+        $this->assertIsInt($bits);
+        $this->assertSame(100, $bits);
+    }
+
+    public function testGetPrivateMethodWithArguments(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $this->getPrivateMethod('subtractBits', [self::BITS]);
+
+        $this->assertIsInt($this->getPrivateProperty(self::PROPIERTY));
+        $this->assertSame(84, $this->getPrivateProperty(self::PROPIERTY));
+    }
+
+    public function testGetPrivateMethodWithArgumentsAndReturn(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $result = $this->getPrivateMethod('resultBits', [self::BITS]);
+
+        $this->assertIsInt($result);
+        $this->assertSame(84, $result);
     }
 
     public function testGetPrivateProperty(): void

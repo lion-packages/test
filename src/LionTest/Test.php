@@ -23,6 +23,21 @@ abstract class Test extends TestCase
     }
 
     /**
+     * Gets the private or protected methods of a class
+     * */
+    public function getPrivateMethod(string $method, ?array $args = null): mixed
+    {
+        $reflectionMethod = $this->reflectionClass->getMethod($method);
+        $reflectionMethod->setAccessible(true);
+
+        if (is_array($args)) {
+            return $reflectionMethod->invokeArgs($this->instance, $args);
+        }
+
+        return $reflectionMethod->invoke($this->instance);
+    }
+
+    /**
      * Gets the value of a private or protected property of a class
      * */
     public function getPrivateProperty(string $property): mixed
