@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LionTest;
+namespace Lion\Test;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
