@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use LionTest\Test;
-use ReflectionClass;
+use Lion\Test\Test;
 
 class TestTest extends Test
 {
