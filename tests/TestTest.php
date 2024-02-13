@@ -16,6 +16,7 @@ class TestTest extends Test
     const URL_PATH = self::STORAGE . 'example/';
     const FILE_NAME = 'image.png';
     const FILE_NAME_CUSTOM = 'custom.png';
+    const JSON = ['name' => 'lion'];
 
     private mixed $customClass;
 
@@ -128,5 +129,10 @@ class TestTest extends Test
         $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
 
         $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
+    }
+
+    public function testAssertJsonContent(): void
+    {
+        $this->assertJsonContent(json_encode(self::JSON), ['name' => 'lion']);
     }
 }

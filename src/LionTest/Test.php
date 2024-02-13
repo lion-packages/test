@@ -102,10 +102,17 @@ abstract class Test extends TestCase
         int $y = 100,
         string $path = './storage/',
         string $fileName = 'image.png'
-    ): void
-    {
+    ): void {
         $image = imagecreatetruecolor($x, $y);
         imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
         imagepng($image, "{$path}{$fileName}");
+    }
+
+    /**
+     * Assertion to test if a JSON object is identical to the defined array
+     * */
+    public function assertJsonContent(string $json, array $options): void
+    {
+        $this->assertSame($options, json_decode($json, true));
     }
 }
