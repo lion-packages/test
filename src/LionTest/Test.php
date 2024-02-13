@@ -123,4 +123,15 @@ abstract class Test extends TestCase
     {
         $this->assertSame($value, $this->getPrivateProperty($property));
     }
+
+    /**
+     * Method to perform an assertion of an object to test if it is an
+     * instance of that class
+     * */
+    public function assertInstances(object $instance, array $instances): void
+    {
+        foreach ($instances as $class) {
+            $this->assertInstanceOf($class, $instance);
+        }
+    }
 }

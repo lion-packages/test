@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Tests;
 
 use Lion\Test\Test;
+use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
 {
+    use TestProviderTrait;
+
     const BITS = 16;
     const X = 200;
     const Y = 150;
@@ -142,5 +145,13 @@ class TestTest extends Test
         $this->setPrivateProperty('bits', self::BITS);
 
         $this->assertPropertyValue('bits', self::BITS);
+    }
+
+    /**
+     * @dataProvider assertInstancesProvider
+     * */
+    public function testAssertInstances(object $instance, array|string $instances): void
+    {
+        $this->assertInstances($instance, $instances);
     }
 }
