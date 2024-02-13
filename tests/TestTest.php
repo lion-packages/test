@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Tests;
 
 use Lion\Test\Test;
+use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
 {
+    use TestProviderTrait;
+
     const BITS = 16;
     const X = 200;
     const Y = 150;
@@ -16,6 +19,7 @@ class TestTest extends Test
     const URL_PATH = self::STORAGE . 'example/';
     const FILE_NAME = 'image.png';
     const FILE_NAME_CUSTOM = 'custom.png';
+    const JSON = ['name' => 'lion'];
 
     private mixed $customClass;
 
@@ -128,5 +132,36 @@ class TestTest extends Test
         $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
 
         $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
+    }
+
+    public function testAssertJsonContent(): void
+    {
+        $this->assertJsonContent(json_encode(self::JSON), ['name' => 'lion']);
+    }
+
+    public function testAssertPropertyValue(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty('bits', self::BITS);
+
+        $this->assertPropertyValue('bits', self::BITS);
+    }
+
+    /**
+     * @dataProvider assertInstancesProvider
+     * */
+    public function testAssertInstances(object $instance, array|string $instances): void
+    {
+        $this->assertInstances($instance, $instances);
+    }
+
+    public function testAssertWithOb(): void
+    {
+        $this->assertWithOb(function() {
+            header('Content-Type: application/json');
+            echo('Testing');
+
+            $this->assertTrue(true);
+        });
     }
 }

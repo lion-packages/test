@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lion\Test;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
@@ -102,10 +103,47 @@ abstract class Test extends TestCase
         int $y = 100,
         string $path = './storage/',
         string $fileName = 'image.png'
-    ): void
-    {
+    ): void {
         $image = imagecreatetruecolor($x, $y);
         imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
         imagepng($image, "{$path}{$fileName}");
+    }
+
+    /**
+     * Assertion to test if a JSON object is identical to the defined array
+     * */
+    public function assertJsonContent(string $json, array $options): void
+    {
+        $this->assertSame($options, json_decode($json, true));
+    }
+
+    /**
+     * Method to make an assertion to a defined value
+     * */
+    public function assertPropertyValue(string $property, mixed $value): void
+    {
+        $this->assertSame($value, $this->getPrivateProperty($property));
+    }
+
+    /**
+     * Method to perform an assertion of an object to test if it is an
+     * instance of that class
+     * */
+    public function assertInstances(object $instance, array $instances): void
+    {
+        foreach ($instances as $class) {
+            $this->assertInstanceOf($class, $instance);
+        }
+    }
+
+    /**
+     * Perform assertions implementing the use of outputs in the buffer
+     * with ob_start
+     * */
+    public function assertWithOb(Closure $callback): void
+    {
+        ob_start();
+        $callback();
+        ob_end_clean();
     }
 }
