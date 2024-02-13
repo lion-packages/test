@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lion\Test;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
@@ -133,5 +134,16 @@ abstract class Test extends TestCase
         foreach ($instances as $class) {
             $this->assertInstanceOf($class, $instance);
         }
+    }
+
+    /**
+     * Perform assertions implementing the use of outputs in the buffer
+     * with ob_start
+     * */
+    public function assertWithOb(Closure $callback): void
+    {
+        ob_start();
+        $callback();
+        ob_end_clean();
     }
 }

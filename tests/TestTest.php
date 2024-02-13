@@ -154,4 +154,14 @@ class TestTest extends Test
     {
         $this->assertInstances($instance, $instances);
     }
+
+    public function testAssertWithOb(): void
+    {
+        $this->assertWithOb(function() {
+            header('Content-Type: application/json');
+            echo('Testing');
+
+            $this->assertTrue(true);
+        });
+    }
 }
