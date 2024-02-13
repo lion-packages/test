@@ -115,4 +115,12 @@ abstract class Test extends TestCase
     {
         $this->assertSame($options, json_decode($json, true));
     }
+
+    /**
+     * Method to make an assertion to a defined value
+     * */
+    public function assertPropertyValue(string $property, mixed $value): void
+    {
+        $this->assertSame($value, $this->getPrivateProperty($property));
+    }
 }

@@ -135,4 +135,12 @@ class TestTest extends Test
     {
         $this->assertJsonContent(json_encode(self::JSON), ['name' => 'lion']);
     }
+
+    public function testAssertPropertyValue(): void
+    {
+        $this->initReflection($this->customClass);
+        $this->setPrivateProperty('bits', self::BITS);
+
+        $this->assertPropertyValue('bits', self::BITS);
+    }
 }
