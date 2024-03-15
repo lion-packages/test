@@ -9,26 +9,60 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 
+/**
+ * TestCase extended abstract test class, allows you to write unit tests in PHP
+ * using the PHPUnit framework.
+ *
+ * @property mixed $instance [Object that will be reflected]
+ * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
+ *
+ * @package Lion\Test
+ */
 abstract class Test extends TestCase
 {
-	private mixed $instance;
+    /**
+     * [Object that will be reflected]
+     *
+     * @var mixed $instance
+     */
+    private mixed $instance;
+
+    /**
+     * [Object of ReflectionClass class]
+     *
+     * @var ReflectionClass $reflectionClass
+     */
     private ReflectionClass $reflectionClass;
 
     /**
      * Initializes the object to perform a reflection on a class
-     * */
+     *
+     * @param mixed $instance [Object of any type that is subjected to
+     * reflection]
+     *
+     * @return void
+     */
     public function initReflection(mixed $instance): void
     {
         $this->instance = $instance;
+
         $this->reflectionClass = new ReflectionClass($this->instance);
     }
 
     /**
-     * Gets the private or protected methods of a class
-     * */
+     * Gets the private or protected methods of a reflected class
+     *
+     * @param string $method [Name of the private or protected method that you
+     * want to get and execute]
+     * @param array $args [Optional parameter that allows you to specify the
+     * arguments that will be passed to the method when it is invoked]
+     *
+     * @return mixed
+     */
     public function getPrivateMethod(string $method, ?array $args = null): mixed
     {
         $reflectionMethod = $this->reflectionClass->getMethod($method);
+
         $reflectionMethod->setAccessible(true);
 
         if (is_array($args)) {
@@ -39,29 +73,47 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the value of a private or protected property of a class
-     * */
+     * Gets the value of a private or protected property of a reflected class
+     *
+     * @param string $property [Name of the private or protected property
+     * whose value you want to obtain]
+     *
+     * @return mixed
+     */
     public function getPrivateProperty(string $property): mixed
     {
         $customProperty = $this->reflectionClass->getProperty($property);
+
         $customProperty->setAccessible(true);
 
         return $customProperty->getValue($this->instance);
     }
 
     /**
-     * Changes the value of a private or protected property of a class
-     * */
+     * Sets the value of a private or protected property of a reflected class
+     *
+     * @param string $property [Name of the private or protected property whose
+     * value you want to set]
+     * @param mixed $value [Value to assign to the specified property]
+     *
+     * @return void
+     */
     public function setPrivateProperty(string $property, mixed $value): void
     {
         $customProperty = $this->reflectionClass->getProperty($property);
+
         $customProperty->setAccessible(true);
+
         $customProperty->setValue($this->instance, $value);
     }
 
     /**
-     * Remove all files in a defined path
-     * */
+     * Delete a directory and all its contents recursively
+     *
+     * @param string $dir [Directory to be deleted recursively]
+     *
+     * @return void
+     */
     public function rmdirRecursively(string $dir): void
     {
         if (is_dir($dir)) {
@@ -69,7 +121,7 @@ abstract class Test extends TestCase
 
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                	$path = $dir . '/' . $object;
+                    $path = $dir . '/' . $object;
 
                     if (is_dir($path)) {
                         $this->rmdirRecursively($path);
@@ -85,7 +137,12 @@ abstract class Test extends TestCase
 
     /**
      * Create folders from a defined path
-     * */
+     *
+     * @param string $directory [Indicates the path of the directory you want
+     * to create]
+     *
+     * @return void
+     */
     public function createDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
@@ -96,8 +153,16 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Generates a blank image with the defined properties
-     * */
+     * Allows generating a blank image with specified dimensions and saving it
+     * to a specific path with a given file name
+     *
+     * @param int $x [Represents the width of the image to be created]
+     * @param int $y [Represents the height of the image to be created]
+     * @param string $path [Directory path where the image is saved]
+     * @param string $fileName [Name of the image file to be created]
+     *
+     * @return void
+     */
     public function createImage(
         int $x = 100,
         int $y = 100,
@@ -105,21 +170,36 @@ abstract class Test extends TestCase
         string $fileName = 'image.png'
     ): void {
         $image = imagecreatetruecolor($x, $y);
+
         imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+
         imagepng($image, "{$path}{$fileName}");
     }
 
     /**
      * Assertion to test if a JSON object is identical to the defined array
-     * */
+     *
+     * @param string $json [JSON string to parse and compare with the provided
+     * data structure]
+     * @param array $options [Expected data structure expected to be present
+     * in the JSON]
+     *
+     * @return void
+     */
     public function assertJsonContent(string $json, array $options): void
     {
         $this->assertSame($options, json_decode($json, true));
     }
 
     /**
-     * Method to make an assertion to a defined value
-     * */
+     * Makes an assertion about the value of a specific property of a class
+     *
+     * @param string $property [Name of the property on which the assertion
+     * will be made]
+     * @param mixed $value [Expected value of the property]
+     *
+     * @return void
+     */
     public function assertPropertyValue(string $property, mixed $value): void
     {
         $this->assertSame($value, $this->getPrivateProperty($property));
@@ -128,7 +208,13 @@ abstract class Test extends TestCase
     /**
      * Method to perform an assertion of an object to test if it is an
      * instance of that class
-     * */
+     *
+     * @param object $instance [Object whose type you want to verify]
+     * @param array $instances [Array containing the names of the classes
+     * with which you want to compare the object]
+     *
+     * @return void
+     */
     public function assertInstances(object $instance, array $instances): void
     {
         foreach ($instances as $class) {
@@ -139,11 +225,18 @@ abstract class Test extends TestCase
     /**
      * Perform assertions implementing the use of outputs in the buffer
      * with ob_start
-     * */
+     *
+     * @param Closure $callback [Anonymous function to be executed within the
+     * context of output buffering]
+     *
+     * @return void
+     */
     public function assertWithOb(Closure $callback): void
     {
         ob_start();
+
         $callback();
+
         ob_end_clean();
     }
 }
