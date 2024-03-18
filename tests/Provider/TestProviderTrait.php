@@ -31,4 +31,20 @@ trait TestProviderTrait
             ]
         ];
     }
+
+    public static function getResponseProvider(): array
+    {
+        return [
+            [
+                'text' => 'testing in classes',
+                'split' => 'in',
+                'return' => 'classes'
+            ],
+            [
+                'text' => 'example test',
+                'split' => ' ',
+                'return' => 'test'
+            ]
+        ];
+    }
 }

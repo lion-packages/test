@@ -244,4 +244,19 @@ abstract class Test extends TestCase
 
         return $outputGetClean;
     }
+
+    /**
+     * Gets a response string from the separation of a defined word
+     *
+     * @param  string $message [Defined message]
+     * @param  string $messageSplit [Separation text]
+     *
+     * @return string
+     */
+    public function getResponse(string $message, string $messageSplit): string
+    {
+        $split = explode($messageSplit, $message);
+
+        return trim(end($split));
+    }
 }

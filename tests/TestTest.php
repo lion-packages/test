@@ -162,4 +162,12 @@ class TestTest extends Test
             echo(self::MESSAGE);
         });
     }
+
+    /**
+     * @dataProvider getResponseProvider
+     */
+    public function testGetResponse(string $text, string $split, string $return): void
+    {
+        $this->assertSame($return, $this->getResponse($text, $split));
+    }
 }
