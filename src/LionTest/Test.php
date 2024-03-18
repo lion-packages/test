@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lion\Test;
 
 use Closure;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
@@ -258,5 +259,21 @@ abstract class Test extends TestCase
         $split = explode($messageSplit, $message);
 
         return trim(end($split));
+    }
+
+    /**
+     * Gets the exception object when consuming an API
+     *
+     * @param  Closure $callback [Function that executes the exception]
+     *
+     * @return Exception
+     */
+    public function getExceptionFromApi(Closure $callback): Exception
+    {
+        try {
+            $callback();
+        } catch (Exception $e) {
+            return $e;
+        }
     }
 }

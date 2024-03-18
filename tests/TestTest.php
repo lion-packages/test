@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Exception;
 use Lion\Test\Test;
 use Tests\Provider\TestProviderTrait;
 
@@ -21,6 +22,7 @@ class TestTest extends Test
     const FILE_NAME_CUSTOM = 'custom.png';
     const JSON = ['name' => 'lion'];
     const MESSAGE = 'Testing';
+    const EXCEPTION_MESSAGE = 'Exception in the tests';
 
     private mixed $customClass;
 
@@ -169,5 +171,14 @@ class TestTest extends Test
     public function testGetResponse(string $text, string $split, string $return): void
     {
         $this->assertSame($return, $this->getResponse($text, $split));
+    }
+
+    public function testGetExceptionFromApi(): void
+    {
+        $exception = $this->getExceptionFromApi(function() {
+            throw new Exception(self::EXCEPTION_MESSAGE);
+        });
+
+        $this->assertSame(self::EXCEPTION_MESSAGE, $exception->getMessage());
     }
 }
