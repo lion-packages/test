@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lion\Test;
 
 use Closure;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
@@ -13,7 +14,7 @@ use RuntimeException;
  * TestCase extended abstract test class, allows you to write unit tests in PHP
  * using the PHPUnit framework.
  *
- * @property mixed $instance [Object that will be reflected]
+ * @property object $instance [Object that will be reflected]
  * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
  *
  * @package Lion\Test
@@ -23,9 +24,9 @@ abstract class Test extends TestCase
     /**
      * [Object that will be reflected]
      *
-     * @var mixed $instance
+     * @var object $instance
      */
-    private mixed $instance;
+    private object $instance;
 
     /**
      * [Object of ReflectionClass class]
@@ -37,12 +38,12 @@ abstract class Test extends TestCase
     /**
      * Initializes the object to perform a reflection on a class
      *
-     * @param mixed $instance [Object of any type that is subjected to
+     * @param object $instance [Object of any type that is subjected to
      * reflection]
      *
      * @return void
      */
-    public function initReflection(mixed $instance): void
+    public function initReflection(object $instance): void
     {
         $this->instance = $instance;
 
@@ -226,17 +227,53 @@ abstract class Test extends TestCase
      * Perform assertions implementing the use of outputs in the buffer
      * with ob_start
      *
+     * @param string $output [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
      * context of output buffering]
      *
-     * @return void
+     * @return string|false
      */
-    public function assertWithOb(Closure $callback): void
+    public function assertWithOb(string $output, Closure $callback): string|false
     {
         ob_start();
 
         $callback();
 
-        ob_end_clean();
+        $outputGetClean = ob_get_clean();
+
+        $this->assertSame($output, $outputGetClean);
+
+        return $outputGetClean;
+    }
+
+    /**
+     * Gets a response string from the separation of a defined word
+     *
+     * @param  string $message [Defined message]
+     * @param  string $messageSplit [Separation text]
+     *
+     * @return string
+     */
+    public function getResponse(string $message, string $messageSplit): string
+    {
+        $split = explode($messageSplit, $message);
+
+        return trim(end($split));
+    }
+
+    /**
+     * Gets the exception object when consuming an API
+     *
+     * @param  Closure $callback [Function that executes the exception]
+     *
+     * @return Exception
+     */
+    public function getExceptionFromApi(Closure $callback): Exception
+    {
+        try {
+            $callback();
+        } catch (Exception $e) {
+            return $e;
+        }
     }
 }
