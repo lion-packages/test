@@ -20,6 +20,7 @@ class TestTest extends Test
     const FILE_NAME = 'image.png';
     const FILE_NAME_CUSTOM = 'custom.png';
     const JSON = ['name' => 'lion'];
+    const MESSAGE = 'Testing';
 
     private mixed $customClass;
 
@@ -157,11 +158,8 @@ class TestTest extends Test
 
     public function testAssertWithOb(): void
     {
-        $this->assertWithOb(function() {
-            header('Content-Type: application/json');
-            echo('Testing');
-
-            $this->assertTrue(true);
+        $this->assertWithOb(self::MESSAGE, function() {
+            echo(self::MESSAGE);
         });
     }
 }

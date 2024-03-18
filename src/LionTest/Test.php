@@ -226,17 +226,22 @@ abstract class Test extends TestCase
      * Perform assertions implementing the use of outputs in the buffer
      * with ob_start
      *
+     * @param string $output [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
      * context of output buffering]
      *
-     * @return void
+     * @return string|false
      */
-    public function assertWithOb(Closure $callback): void
+    public function assertWithOb(string $output, Closure $callback): string|false
     {
         ob_start();
 
         $callback();
 
-        ob_end_clean();
+        $outputGetClean = ob_get_clean();
+
+        $this->assertSame($output, $outputGetClean);
+
+        return $outputGetClean;
     }
 }
