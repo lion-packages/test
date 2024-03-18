@@ -13,7 +13,7 @@ use RuntimeException;
  * TestCase extended abstract test class, allows you to write unit tests in PHP
  * using the PHPUnit framework.
  *
- * @property mixed $instance [Object that will be reflected]
+ * @property object $instance [Object that will be reflected]
  * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
  *
  * @package Lion\Test
@@ -23,9 +23,9 @@ abstract class Test extends TestCase
     /**
      * [Object that will be reflected]
      *
-     * @var mixed $instance
+     * @var object $instance
      */
-    private mixed $instance;
+    private object $instance;
 
     /**
      * [Object of ReflectionClass class]
@@ -37,12 +37,12 @@ abstract class Test extends TestCase
     /**
      * Initializes the object to perform a reflection on a class
      *
-     * @param mixed $instance [Object of any type that is subjected to
+     * @param object $instance [Object of any type that is subjected to
      * reflection]
      *
      * @return void
      */
-    public function initReflection(mixed $instance): void
+    public function initReflection(object $instance): void
     {
         $this->instance = $instance;
 
