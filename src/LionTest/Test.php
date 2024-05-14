@@ -1,39 +1,72 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace Lion\Test;
 
 use Closure;
-use Exception;
+use Exception as GlobalException;
+use Lion\Exceptions\Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 
 /**
  * TestCase extended abstract test class, allows you to write unit tests in PHP
- * using the PHPUnit framework.
+ * using the PHPUnit framework
  *
- * @property object $instance [Object that will be reflected]
  * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
+ * @property object $instance [Object that will be reflected]
+ * @property string $exception [Exception class]
+ * @property string $exceptionMessage [Exception message]
+ * @property string $exceptionStatus [Exception response status]
+ * @property string $exceptionCode [Exception code]
  *
  * @package Lion\Test
  */
 abstract class Test extends TestCase
 {
     /**
-     * [Object that will be reflected]
-     *
-     * @var object $instance
-     */
-    private object $instance;
-
-    /**
      * [Object of ReflectionClass class]
      *
      * @var ReflectionClass $reflectionClass
      */
     private ReflectionClass $reflectionClass;
+
+    /**
+     * [Object that will be reflected]
+     *
+     * @var object $instance
+     */
+    private ?object $instance = null;
+
+    /**
+     * [Exception class]
+     *
+     * @var string $exception
+     */
+    private string $exception;
+
+    /**
+     * [Exception message]
+     *
+     * @var string $exceptionMessage
+     */
+    private string $exceptionMessage;
+
+    /**
+     * [Exception response status]
+     *
+     * @var string $exceptionStatus
+     */
+    private string $exceptionStatus;
+
+    /**
+     * [Exception code]
+     *
+     * @var int $exceptionCode
+     */
+    private int $exceptionCode;
 
     /**
      * Initializes the object to perform a reflection on a class
@@ -43,7 +76,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function initReflection(object $instance): void
+    final public function initReflection(object $instance): void
     {
         $this->instance = $instance;
 
@@ -60,7 +93,7 @@ abstract class Test extends TestCase
      *
      * @return mixed
      */
-    public function getPrivateMethod(string $method, ?array $args = null): mixed
+    final public function getPrivateMethod(string $method, ?array $args = null): mixed
     {
         $reflectionMethod = $this->reflectionClass->getMethod($method);
 
@@ -81,7 +114,7 @@ abstract class Test extends TestCase
      *
      * @return mixed
      */
-    public function getPrivateProperty(string $property): mixed
+    final public function getPrivateProperty(string $property): mixed
     {
         $customProperty = $this->reflectionClass->getProperty($property);
 
@@ -99,7 +132,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function setPrivateProperty(string $property, mixed $value): void
+    final public function setPrivateProperty(string $property, mixed $value): void
     {
         $customProperty = $this->reflectionClass->getProperty($property);
 
@@ -115,7 +148,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function rmdirRecursively(string $dir): void
+    final public function rmdirRecursively(string $dir): void
     {
         if (is_dir($dir)) {
             $objects = scandir($dir);
@@ -144,11 +177,11 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function createDirectory(string $directory): void
+    final public function createDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
-                throw new RuntimeException("Could not create directory: {$directory}");
+                throw new RuntimeException("could not create directory: {$directory}");
             }
         }
     }
@@ -164,7 +197,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function createImage(
+    final public function createImage(
         int $x = 100,
         int $y = 100,
         string $path = './storage/',
@@ -187,7 +220,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function assertJsonContent(string $json, array $options): void
+    final public function assertJsonContent(string $json, array $options): void
     {
         $this->assertSame($options, json_decode($json, true));
     }
@@ -201,7 +234,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function assertPropertyValue(string $property, mixed $value): void
+    final public function assertPropertyValue(string $property, mixed $value): void
     {
         $this->assertSame($value, $this->getPrivateProperty($property));
     }
@@ -216,7 +249,7 @@ abstract class Test extends TestCase
      *
      * @return void
      */
-    public function assertInstances(object $instance, array $instances): void
+    final public function assertInstances(object $instance, array $instances): void
     {
         foreach ($instances as $class) {
             $this->assertInstanceOf($class, $instance);
@@ -224,8 +257,8 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Perform assertions implementing the use of outputs in the buffer
-     * with ob_start
+     * Perform assertions implementing the use of outputs in the buffer with
+     * ob_start
      *
      * @param string $output [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
@@ -233,7 +266,7 @@ abstract class Test extends TestCase
      *
      * @return string|false
      */
-    public function assertWithOb(string $output, Closure $callback): string|false
+    final public function assertWithOb(string $output, Closure $callback): string|false
     {
         ob_start();
 
@@ -249,12 +282,12 @@ abstract class Test extends TestCase
     /**
      * Gets a response string from the separation of a defined word
      *
-     * @param  string $message [Defined message]
-     * @param  string $messageSplit [Separation text]
+     * @param string $message [Defined message]
+     * @param string $messageSplit [Separation text]
      *
      * @return string
      */
-    public function getResponse(string $message, string $messageSplit): string
+    final public function getResponse(string $message, string $messageSplit): string
     {
         $split = explode($messageSplit, $message);
 
@@ -264,16 +297,111 @@ abstract class Test extends TestCase
     /**
      * Gets the exception object when consuming an API
      *
-     * @param  Closure $callback [Function that executes the exception]
+     * @param Closure $callback [Function that executes the exception]
      *
-     * @return Exception
+     * @return GlobalException
+     *
+     * @throws GlobalException [If you get an exception]
      */
-    public function getExceptionFromApi(Closure $callback): Exception
+    final public function getExceptionFromApi(Closure $callback): GlobalException
     {
         try {
             $callback();
-        } catch (Exception $e) {
+        } catch (GlobalException $e) {
             return $e;
         }
+    }
+
+    /**
+     * Run a process to validate if an exception is thrown
+     *
+     * @param Closure|null $exceptionCallback [Function that is executed]
+     *
+     * @return void
+     *
+     * @throws Exception [If the process fails]
+     */
+    final public function expectLionException(?Closure $callback = null): void
+    {
+        if (null === $callback) {
+            /** @var Exception $lionException */
+            $lionException = new ($this->exception)(
+                $this->exceptionMessage,
+                $this->exceptionStatus,
+                $this->exceptionCode
+            );
+
+            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
+            $this->expectException($this->exception);
+            $this->expectExceptionMessage($this->exceptionMessage);
+            $this->expectExceptionCode($this->exceptionCode);
+
+            throw $lionException;
+        } else {
+            try {
+                $callback();
+            } catch (Exception $e) {
+                $this->assertSame($this->exception, $e::class);
+                $this->assertSame($this->exceptionStatus, $e->getStatus());
+                $this->assertSame($this->exceptionMessage, $e->getMessage());
+                $this->assertSame($this->exceptionCode, $e->getCode());
+            }
+        }
+    }
+
+    /**
+     * Initialize an exception
+     *
+     * @param string $exception [Exception class]
+     *
+     * @return Test
+     */
+    final public function exception(string $exception): Test
+    {
+        $this->exception = $exception;
+
+        return $this;
+    }
+
+    /**
+     * Initialize the exception message
+     *
+     * @param string $exceptionMessage [Exception message]
+     *
+     * @return Test
+     */
+    final public function exceptionMessage(string $exceptionMessage): Test
+    {
+        $this->exceptionMessage = $exceptionMessage;
+
+        return $this;
+    }
+
+    /**
+     * Initialize the response state of the exception
+     *
+     * @param string $exceptionStatus [Exception response status]
+     *
+     * @return Test
+     */
+    final public function exceptionStatus(string $exceptionStatus): Test
+    {
+        $this->exceptionStatus = $exceptionStatus;
+
+        return $this;
+    }
+
+    /**
+     * Initialize the exception code
+     *
+     * @param int $exceptionCode [Exception code]
+     *
+     * @return Test
+     */
+    final public function exceptionCode(int $exceptionCode): Test
+    {
+        $this->exceptionCode = $exceptionCode;
+
+        return $this;
     }
 }

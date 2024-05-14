@@ -4,9 +4,47 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d33c3b21483c19152943539dbb44ead",
+    "content-hash": "05272349a3e86d0cb250d0661f299448",
     "packages": [],
     "packages-dev": [
+        {
+            "name": "lion/exceptions",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lion-packages/exceptions.git",
+                "reference": "682bf2b80feaac7e9b8fbe92b5c6d08d105d76fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lion-packages/exceptions/zipball/682bf2b80feaac7e9b8fbe92b5c6d08d105d76fa",
+                "reference": "682bf2b80feaac7e9b8fbe92b5c6d08d105d76fa",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "require-dev": {
+                "lion/test": "^1.3",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lion\\Exceptions\\": "src/LionExceptions/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Handling exceptions and serializations",
+            "support": {
+                "issues": "https://github.com/lion-packages/exceptions/issues",
+                "source": "https://github.com/lion-packages/exceptions/tree/v1.0.0"
+            },
+            "time": "2024-05-14T21:19:08+00:00"
+        },
         {
             "name": "myclabs/deep-copy",
             "version": "1.11.1",
