@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Exception;
+use Exception as GlobalException;
+use JsonSerializable;
+use Lion\Exceptions\Exception;
+use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
@@ -24,6 +28,9 @@ class TestTest extends Test
     const JSON = ['name' => 'lion'];
     const MESSAGE = 'Testing';
     const EXCEPTION_MESSAGE = 'Exception in the tests';
+    const ERR_EXCEPTION_MESSAGE = 'ERR';
+    const ERR_EXCEPTION_STATUS = 'session-error';
+    const ERR_EXCEPTION_CODE = 500;
 
     private mixed $customClass;
 
@@ -160,7 +167,7 @@ class TestTest extends Test
 
     public function testAssertWithOb(): void
     {
-        $this->assertWithOb(self::MESSAGE, function () {
+        $this->assertWithOb(self::MESSAGE, function (): void {
             echo (self::MESSAGE);
         });
     }
@@ -173,10 +180,83 @@ class TestTest extends Test
 
     public function testGetExceptionFromApi(): void
     {
-        $exception = $this->getExceptionFromApi(function () {
-            throw new Exception(self::EXCEPTION_MESSAGE);
+        $exception = $this->getExceptionFromApi(function (): void {
+            throw new GlobalException(self::EXCEPTION_MESSAGE);
         });
 
         $this->assertSame(self::EXCEPTION_MESSAGE, $exception->getMessage());
+    }
+
+    public function testExpectLionExceptionIsString(): void
+    {
+        $customException = new class extends Exception implements JsonSerializable
+        {
+            use ExceptionTrait;
+        };
+
+        $this
+            ->exception($customException::class)
+            ->exceptionMessage(self::ERR_EXCEPTION_MESSAGE)
+            ->exceptionStatus(self::ERR_EXCEPTION_STATUS)
+            ->exceptionCode(self::ERR_EXCEPTION_CODE)
+            ->expectLionException();
+    }
+
+    public function testExpectLionExceptionIsCallback(): void
+    {
+        $customException = new class extends Exception implements JsonSerializable
+        {
+            use ExceptionTrait;
+        };
+
+        $this
+            ->exception($customException::class)
+            ->exceptionMessage(self::ERR_EXCEPTION_MESSAGE)
+            ->exceptionStatus(self::ERR_EXCEPTION_STATUS)
+            ->exceptionCode(self::ERR_EXCEPTION_CODE)
+            ->expectLionException(function () use ($customException): void {
+                throw new $customException(
+                    self::ERR_EXCEPTION_MESSAGE,
+                    self::ERR_EXCEPTION_STATUS,
+                    self::ERR_EXCEPTION_CODE
+                );
+            });
+    }
+
+    public function testException(): void
+    {
+        $customException = new class extends Exception implements JsonSerializable
+        {
+            use ExceptionTrait;
+        };
+
+        $this->assertInstances($this->exception($customException::class), [
+            Test::class,
+            TestCase::class
+        ]);
+    }
+
+    public function testExceptionMessage(): void
+    {
+        $this->assertInstances($this->exceptionMessage(self::EXCEPTION_MESSAGE), [
+            Test::class,
+            TestCase::class
+        ]);
+    }
+
+    public function testExceptionStatus(): void
+    {
+        $this->assertInstances($this->exceptionStatus(self::ERR_EXCEPTION_STATUS), [
+            Test::class,
+            TestCase::class
+        ]);
+    }
+
+    public function testExceptionCode(): void
+    {
+        $this->assertInstances($this->exceptionCode(self::ERR_EXCEPTION_CODE), [
+            Test::class,
+            TestCase::class
+        ]);
     }
 }
