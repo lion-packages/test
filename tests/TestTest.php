@@ -6,6 +6,7 @@ namespace Tests;
 
 use Exception;
 use Lion\Test\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
@@ -30,7 +31,8 @@ class TestTest extends Test
     {
         $this->createDirectory(self::URL_PATH);
 
-        $this->customClass = new class {
+        $this->customClass = new class
+        {
             private int $bits = 100;
 
             public function setBits(int $bits): void
@@ -150,9 +152,7 @@ class TestTest extends Test
         $this->assertPropertyValue('bits', self::BITS);
     }
 
-    /**
-     * @dataProvider assertInstancesProvider
-     * */
+    #[DataProvider('assertInstancesProvider')]
     public function testAssertInstances(object $instance, array|string $instances): void
     {
         $this->assertInstances($instance, $instances);
@@ -160,14 +160,12 @@ class TestTest extends Test
 
     public function testAssertWithOb(): void
     {
-        $this->assertWithOb(self::MESSAGE, function() {
-            echo(self::MESSAGE);
+        $this->assertWithOb(self::MESSAGE, function () {
+            echo (self::MESSAGE);
         });
     }
 
-    /**
-     * @dataProvider getResponseProvider
-     */
+    #[DataProvider('getResponseProvider')]
     public function testGetResponse(string $text, string $split, string $return): void
     {
         $this->assertSame($return, $this->getResponse($text, $split));
@@ -175,7 +173,7 @@ class TestTest extends Test
 
     public function testGetExceptionFromApi(): void
     {
-        $exception = $this->getExceptionFromApi(function() {
+        $exception = $this->getExceptionFromApi(function () {
             throw new Exception(self::EXCEPTION_MESSAGE);
         });
 

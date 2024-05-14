@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -148,7 +148,7 @@ abstract class Test extends TestCase
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
-                throw new RuntimeException("Could not create directory: {$directory}");
+                throw new RuntimeException("could not create directory: {$directory}");
             }
         }
     }
@@ -224,8 +224,8 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Perform assertions implementing the use of outputs in the buffer
-     * with ob_start
+     * Perform assertions implementing the use of outputs in the buffer with
+     * ob_start
      *
      * @param string $output [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
@@ -249,8 +249,8 @@ abstract class Test extends TestCase
     /**
      * Gets a response string from the separation of a defined word
      *
-     * @param  string $message [Defined message]
-     * @param  string $messageSplit [Separation text]
+     * @param string $message [Defined message]
+     * @param string $messageSplit [Separation text]
      *
      * @return string
      */
@@ -264,7 +264,7 @@ abstract class Test extends TestCase
     /**
      * Gets the exception object when consuming an API
      *
-     * @param  Closure $callback [Function that executes the exception]
+     * @param Closure $callback [Function that executes the exception]
      *
      * @return Exception
      */
