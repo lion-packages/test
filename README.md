@@ -15,6 +15,16 @@
   <img src="https://poser.pugx.org/lion/test/require/php" alt="PHP Version Require">
 </p>
 
+## About Lion-Test
+
+Lion-Test is a library designed to enhance PHPUnit testing by extending the TestCase class and adding additional functions to simplify test development. This library aims to streamline the process of creating, managing, and running tests, allowing developers to focus on essential logic and reduce boilerplate code.
+
+Features
+
+- Easy-to-use assertions beyond the default PHPUnit set.
+- Custom helper functions for common testing patterns.
+- Integration with PHPUnit for seamless test execution.
+
 ## Install
 
 ```bash
