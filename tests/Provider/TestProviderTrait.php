@@ -61,4 +61,30 @@ trait TestProviderTrait
             ],
         ];
     }
+
+    public static function assertHeaderNotHasKeyProvider(): array
+    {
+        return [
+            [
+                'header' => 'HTTP_AUTHORIZATION',
+                'headerValue' => 'bearer example.bearer.test',
+            ],
+            [
+                'header' => 'HTTP_CONTENT_TYPE',
+                'headerValue' => 'application/json',
+            ],
+            [
+                'header' => 'HTTP_ACCEPT_LANGUAGE',
+                'headerValue' => 'en-US,en;q=0.9',
+            ],
+            [
+                'header' => 'HTTP_USER_AGENT',
+                'headerValue' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36',
+            ],
+            [
+                'header' => 'HTTP_X_REQUESTED_WITH',
+                'headerValue' => 'XMLHttpRequest',
+            ],
+        ];
+    }
 }

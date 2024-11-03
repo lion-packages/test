@@ -433,4 +433,18 @@ abstract class Test extends TestCase
 
         $this->assertTrue($isValidDate, "Failed asserting that '{$value}' is a valid date in format '{$format}'.");
     }
+
+    /**
+     * Remove the $_SERVER header and assert if it does not exist
+     *
+     * @param string $header [Header]
+     *
+     * @return void
+     */
+    final public function assertHeaderNotHasKey(string $header): void
+    {
+        unset($_SERVER[$header]);
+
+        $this->assertArrayNotHasKey($header, $_SERVER);
+    }
 }

@@ -307,4 +307,14 @@ class TestTest extends Test
     {
         $this->assertIsDate($date, $format);
     }
+
+    #[DataProvider('assertHeaderNotHasKeyProvider')]
+    public function testAssertHeaderNotHasKey(string $header, string $headerValue): void
+    {
+        $_SERVER[$header] = $headerValue;
+
+        $this->assertArrayHasKey($header, $_SERVER);
+
+        $this->assertHeaderNotHasKey($header);
+    }
 }
