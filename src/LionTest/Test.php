@@ -447,4 +447,43 @@ abstract class Test extends TestCase
 
         $this->assertArrayNotHasKey($header, $_SERVER);
     }
+
+    /**
+     * Removes the values of $_POST, $_GET, $_FILES, $_SERVER and asserts that
+     * they do not exist
+     *
+     * @param string $key
+     *
+     * @return void
+     */
+    final public function assertHttpBodyNotHasKey(string $key): void
+    {
+        $existsInAny = isset($_SERVER[$key]) || isset($_GET[$key]) || isset($_POST[$key]) || isset($_FILES[$key]);
+
+        if (!$existsInAny) {
+            $this->fail("the key '{$key}' does not exist in any HTTP body superglobal");
+        } else {
+            if (isset($_SERVER[$key])) {
+                $this->assertHeaderNotHasKey($key);
+            }
+
+            if (isset($_GET[$key])) {
+                unset($_GET[$key]);
+
+                $this->assertArrayNotHasKey($key, $_GET);
+            }
+
+            if (isset($_POST[$key])) {
+                unset($_POST[$key]);
+
+                $this->assertArrayNotHasKey($key, $_POST);
+            }
+
+            if (isset($_FILES[$key])) {
+                unset($_FILES[$key]);
+
+                $this->assertArrayNotHasKey($key, $_FILES);
+            }
+        }
+    }
 }
