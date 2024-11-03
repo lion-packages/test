@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lion\Test;
 
 use Closure;
+use DateTime;
 use Exception as GlobalException;
 use Lion\Exceptions\Exception;
 use PHPUnit\Framework\TestCase;
@@ -416,5 +417,20 @@ abstract class Test extends TestCase
         $this->exceptionCode = $exceptionCode;
 
         return $this;
+    }
+
+    /**
+     * Assert that a value is a date in the specified format.
+     *
+     * @param string $value [The value to check]
+     * @param string $format [The date format to validate against (default is 'Y-m-d')]
+     */
+    public function assertIsDate(string $value, string $format = 'Y-m-d'): void
+    {
+        $date = DateTime::createFromFormat($format, $value);
+
+        $isValidDate = $date && $date->format($format) === $value;
+
+        $this->assertTrue($isValidDate, "Failed asserting that '{$value}' is a valid date in format '{$format}'.");
     }
 }

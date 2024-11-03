@@ -47,4 +47,18 @@ trait TestProviderTrait
             ]
         ];
     }
+
+    public static function assertIsDateProvider(): array
+    {
+        return [
+            [
+                'date' => '2024-11-02',
+                'format' => 'Y-m-d',
+            ],
+            [
+                'date' => '2024-11-02 19:14:30',
+                'format' => 'Y-m-d H:i:s',
+            ],
+        ];
+    }
 }
