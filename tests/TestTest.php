@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use DateTime;
 use Exception as GlobalException;
 use JsonSerializable;
 use Lion\Exceptions\Exception;
@@ -11,26 +12,27 @@ use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
 {
     use TestProviderTrait;
 
-    const BITS = 16;
-    const X = 200;
-    const Y = 150;
-    const PROPIERTY = 'bits';
-    const STORAGE = './storage/';
-    const URL_PATH = self::STORAGE . 'example/';
-    const FILE_NAME = 'image.png';
-    const FILE_NAME_CUSTOM = 'custom.png';
-    const JSON = ['name' => 'lion'];
-    const MESSAGE = 'Testing';
-    const EXCEPTION_MESSAGE = 'Exception in the tests';
-    const ERR_EXCEPTION_MESSAGE = 'ERR';
-    const ERR_EXCEPTION_STATUS = 'session-error';
-    const ERR_EXCEPTION_CODE = 500;
+    private const int BITS = 16;
+    private const int X = 200;
+    private const int Y = 150;
+    private const string PROPIERTY = 'bits';
+    private const string STORAGE = './storage/';
+    private const string URL_PATH = self::STORAGE . 'example/';
+    private const string FILE_NAME = 'image.png';
+    private const string FILE_NAME_CUSTOM = 'custom.png';
+    private const array JSON = ['name' => 'lion'];
+    private const string MESSAGE = 'Testing';
+    private const string EXCEPTION_MESSAGE = 'Exception in the tests';
+    private const string ERR_EXCEPTION_MESSAGE = 'ERR';
+    private const string ERR_EXCEPTION_STATUS = 'session-error';
+    private const int ERR_EXCEPTION_CODE = 500;
 
     private mixed $customClass;
 
@@ -71,47 +73,70 @@ class TestTest extends Test
         $this->rmdirRecursively(self::STORAGE);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testGetPrivateMethod(): void
     {
         $this->initReflection($this->customClass);
+
         $this->setPrivateProperty(self::PROPIERTY, 100);
+
         $bits = $this->getPrivateMethod('getBits');
 
         $this->assertIsInt($bits);
         $this->assertSame(100, $bits);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testGetPrivateMethodWithArguments(): void
     {
         $this->initReflection($this->customClass);
+
         $this->setPrivateProperty(self::PROPIERTY, 100);
+
         $this->getPrivateMethod('subtractBits', [self::BITS]);
 
         $this->assertIsInt($this->getPrivateProperty(self::PROPIERTY));
         $this->assertSame(84, $this->getPrivateProperty(self::PROPIERTY));
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testGetPrivateMethodWithArgumentsAndReturn(): void
     {
         $this->initReflection($this->customClass);
+
         $this->setPrivateProperty(self::PROPIERTY, 100);
+
         $result = $this->getPrivateMethod('resultBits', [self::BITS]);
 
         $this->assertIsInt($result);
         $this->assertSame(84, $result);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testGetPrivateProperty(): void
     {
         $this->initReflection($this->customClass);
+
         $this->customClass->setBits(self::BITS);
 
         $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testSetPrivateProperty(): void
     {
         $this->initReflection($this->customClass);
+
         $this->setPrivateProperty(self::PROPIERTY, self::BITS);
 
         $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
@@ -120,6 +145,7 @@ class TestTest extends Test
     public function testRmdirRecursively(): void
     {
         $this->createDirectory(self::URL_PATH);
+
         $this->rmdirRecursively(self::URL_PATH);
 
         $this->assertFalse(is_dir(self::URL_PATH));
@@ -151,9 +177,13 @@ class TestTest extends Test
         $this->assertJsonContent(json_encode(self::JSON), ['name' => 'lion']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testAssertPropertyValue(): void
     {
         $this->initReflection($this->customClass);
+
         $this->setPrivateProperty('bits', self::BITS);
 
         $this->assertPropertyValue('bits', self::BITS);
@@ -178,15 +208,24 @@ class TestTest extends Test
         $this->assertSame($return, $this->getResponse($text, $split));
     }
 
+    /**
+     * @throws GlobalException
+     */
     public function testGetExceptionFromApi(): void
     {
         $exception = $this->getExceptionFromApi(function (): void {
-            throw new GlobalException(self::EXCEPTION_MESSAGE);
+            throw new GlobalException(self::EXCEPTION_MESSAGE, self::ERR_EXCEPTION_CODE);
         });
 
+        $this->assertIsObject($exception);
+        $this->assertInstanceOf(GlobalException::class, $exception);
         $this->assertSame(self::EXCEPTION_MESSAGE, $exception->getMessage());
+        $this->assertSame(self::ERR_EXCEPTION_CODE, $exception->getCode());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testExpectLionExceptionIsString(): void
     {
         $customException = new class extends Exception implements JsonSerializable
@@ -202,6 +241,9 @@ class TestTest extends Test
             ->expectLionException();
     }
 
+    /**
+     * @throws Exception
+     */
     public function testExpectLionExceptionIsCallback(): void
     {
         $customException = new class extends Exception implements JsonSerializable
@@ -258,5 +300,11 @@ class TestTest extends Test
             Test::class,
             TestCase::class
         ]);
+    }
+
+    #[DataProvider('assertIsDateProvider')]
+    public function testAssertIsDate(string $date, string $format): void
+    {
+        $this->assertIsDate($date, $format);
     }
 }
