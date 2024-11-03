@@ -9,6 +9,7 @@ use Exception as GlobalException;
 use Lion\Exceptions\Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -36,7 +37,7 @@ abstract class Test extends TestCase
     /**
      * [Object that will be reflected]
      *
-     * @var object $instance
+     * @var object|null $instance
      */
     private ?object $instance = null;
 
@@ -75,6 +76,8 @@ abstract class Test extends TestCase
      * reflection]
      *
      * @return void
+     *
+     * @throws ReflectionException
      */
     final public function initReflection(object $instance): void
     {
@@ -88,10 +91,12 @@ abstract class Test extends TestCase
      *
      * @param string $method [Name of the private or protected method that you
      * want to get and execute]
-     * @param array $args [Optional parameter that allows you to specify the
+     * @param array|null $args [Optional parameter that allows you to specify the
      * arguments that will be passed to the method when it is invoked]
      *
      * @return mixed
+     *
+     * @throws ReflectionException
      */
     final public function getPrivateMethod(string $method, ?array $args = null): mixed
     {
@@ -113,6 +118,8 @@ abstract class Test extends TestCase
      * whose value you want to obtain]
      *
      * @return mixed
+     *
+     * @throws ReflectionException
      */
     final public function getPrivateProperty(string $property): mixed
     {
@@ -131,6 +138,8 @@ abstract class Test extends TestCase
      * @param mixed $value [Value to assign to the specified property]
      *
      * @return void
+     *
+     * @throws ReflectionException
      */
     final public function setPrivateProperty(string $property, mixed $value): void
     {
@@ -233,6 +242,8 @@ abstract class Test extends TestCase
      * @param mixed $value [Expected value of the property]
      *
      * @return void
+     *
+     * @throws ReflectionException
      */
     final public function assertPropertyValue(string $property, mixed $value): void
     {
@@ -299,14 +310,16 @@ abstract class Test extends TestCase
      *
      * @param Closure $callback [Function that executes the exception]
      *
-     * @return GlobalException
+     * @return GlobalException|null
      *
      * @throws GlobalException [If you get an exception]
      */
-    final public function getExceptionFromApi(Closure $callback): GlobalException
+    final public function getExceptionFromApi(Closure $callback): ?GlobalException
     {
         try {
             $callback();
+
+            return null;
         } catch (GlobalException $e) {
             return $e;
         }
@@ -315,7 +328,7 @@ abstract class Test extends TestCase
     /**
      * Run a process to validate if an exception is thrown
      *
-     * @param Closure|null $exceptionCallback [Function that is executed]
+     * @param Closure|null $callback [Function that is executed]
      *
      * @return void
      *
@@ -331,9 +344,9 @@ abstract class Test extends TestCase
                 $this->exceptionCode
             );
 
-            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
             $this->expectException($this->exception);
             $this->expectExceptionMessage($this->exceptionMessage);
+            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
             $this->expectExceptionCode($this->exceptionCode);
 
             throw $lionException;
