@@ -87,4 +87,38 @@ trait TestProviderTrait
             ],
         ];
     }
+
+    public static function assertHttpBodyNotHasKeyProvider(): array
+    {
+        return [
+            [
+                'key' => 'HTTP_AUTHORIZATION',
+                'global' => '_SERVER',
+                'value' => 'bearer example.bearer.test',
+            ],
+            [
+                'key' => 'page',
+                'global' => '_GET',
+                'value' => '1',
+            ],
+            [
+                'key' => 'username',
+                'global' => '_POST',
+                'value' => 'test_user',
+            ],
+            [
+                'key' => 'file_upload',
+                'global' => '_FILES',
+                'value' => [
+                    'name' => 'example.txt',
+                    'type' => 'text/plain'
+                ],
+            ],
+            [
+                'key' => 'X-Requested-With',
+                'global' => '_SERVER',
+                'value' => 'XMLHttpRequest',
+            ],
+        ];
+    }
 }

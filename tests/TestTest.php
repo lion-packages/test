@@ -10,7 +10,9 @@ use JsonSerializable;
 use Lion\Exceptions\Exception;
 use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Tests\Provider\TestProviderTrait;
@@ -316,5 +318,17 @@ class TestTest extends Test
         $this->assertArrayHasKey($header, $_SERVER);
 
         $this->assertHeaderNotHasKey($header);
+    }
+
+    #[DataProvider('assertHttpBodyNotHasKeyProvider')]
+    public function testAssertHttpBodyNotHasKey(string $key, string $global, array|string $value): void
+    {
+        global $$global;
+
+        $$global[$key] = $value;
+
+        $this->assertHttpBodyNotHasKey($key);
+
+        $this->assertArrayNotHasKey($key, $$global);
     }
 }
