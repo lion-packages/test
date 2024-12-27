@@ -9,8 +9,8 @@ RUN useradd -m lion && echo 'lion:lion' | chpasswd && usermod -aG sudo lion && u
 
 # Dependencies
 RUN apt-get update -y \
-    && apt-get install -y sudo nano zsh git curl wget unzip cron sendmail golang-go \
-    && apt-get install -y libpng-dev libzip-dev zlib1g-dev libonig-dev supervisor libevent-dev libssl-dev \
+    && apt-get install -y sudo nano zsh git curl wget unzip cron golang-go \
+    && apt-get install -y libpng-dev libzip-dev zlib1g-dev libonig-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -46,10 +46,17 @@ USER root
 SHELL ["/bin/bash", "--login", "-c"]
 
 # Install logo-ls
-RUN wget https://github.com/Yash-Handa/logo-ls/releases/download/v1.3.7/logo-ls_amd64.deb \
-    && dpkg -i logo-ls_amd64.deb \
-    && rm logo-ls_amd64.deb \
-    && curl https://raw.githubusercontent.com/UTFeight/logo-ls-modernized/master/INSTALL | bash
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        wget https://github.com/Yash-Handa/logo-ls/releases/download/v1.3.7/logo-ls_amd64.deb; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        wget https://github.com/Yash-Handa/logo-ls/releases/download/v1.3.7/logo-ls_arm64.deb; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    dpkg -i logo-ls_*.deb && \
+    rm logo-ls_*.deb && \
+    curl https://raw.githubusercontent.com/UTFeight/logo-ls-modernized/master/INSTALL | bash
 
 # Add configuration in .zshrc
 RUN echo 'alias ls="logo-ls"' >> /home/lion/.zshrc \
