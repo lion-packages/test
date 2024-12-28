@@ -1,6 +1,6 @@
 {
     "name": "lion/test",
-    "description": "library to implement testing with helpers that allow easy testing with PHPUnit",
+    "description": "Library to implement testing with helpers that allow easy testing with PHPUnit",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -14,7 +14,7 @@
         }
     },
     "require": {
-        "php": ">=8.3"
+        "php": ">=8.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.1",
