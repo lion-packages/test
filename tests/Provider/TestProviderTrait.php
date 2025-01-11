@@ -8,6 +8,9 @@ use Tests\Provider\TestProviderInterface;
 
 trait TestProviderTrait
 {
+    /**
+     * @return array<array{instance: object, instances: string[]}>
+     */
     public static function assertInstancesProvider(): array
     {
         $instance1 = new class implements TestProviderInterface {
@@ -32,6 +35,9 @@ trait TestProviderTrait
         ];
     }
 
+    /**
+     * @return array<array{text: string, split: string, return: string}>
+     */
     public static function getResponseProvider(): array
     {
         return [
@@ -48,6 +54,9 @@ trait TestProviderTrait
         ];
     }
 
+    /**
+     * @return array<array{date: string, format: string}>
+     */
     public static function assertIsDateProvider(): array
     {
         return [
@@ -62,6 +71,9 @@ trait TestProviderTrait
         ];
     }
 
+    /**
+     * @return array<array{header: string, headerValue: string}>
+     */
     public static function assertHeaderNotHasKeyProvider(): array
     {
         return [
@@ -89,6 +101,9 @@ trait TestProviderTrait
         ];
     }
 
+    /**
+     * @return array<array{key: string, global: string, value: mixed}>
+     */
     public static function assertHttpBodyNotHasKeyProvider(): array
     {
         return [
