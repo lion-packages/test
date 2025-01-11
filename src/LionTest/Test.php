@@ -7,22 +7,25 @@ namespace Lion\Test;
 use Closure;
 use DateTime;
 use Exception as GlobalException;
+use InvalidArgumentException;
 use Lion\Exceptions\Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 
 /**
  * TestCase extended abstract test class, allows you to write unit tests in PHP
  * using the PHPUnit framework
  *
- * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
+ * @property ReflectionClass<object> $reflectionClass [Object of ReflectionClass
+ * class]
  * @property object $instance [Object that will be reflected]
  * @property string $exception [Exception class]
  * @property string $exceptionMessage [Exception message]
  * @property string $exceptionStatus [Exception response status]
- * @property string $exceptionCode [Exception code]
+ * @property int|string $exceptionCode [Exception code]
  *
  * @package Lion\Test
  */
@@ -31,7 +34,7 @@ abstract class Test extends TestCase
     /**
      * [Object of ReflectionClass class]
      *
-     * @var ReflectionClass $reflectionClass
+     * @var ReflectionClass<object> $reflectionClass
      */
     private ReflectionClass $reflectionClass;
 
@@ -66,9 +69,9 @@ abstract class Test extends TestCase
     /**
      * [Exception code]
      *
-     * @var int $exceptionCode
+     * @var int|string $exceptionCode
      */
-    private int $exceptionCode;
+    private int|string $exceptionCode;
 
     /**
      * Initializes the object to perform a reflection on a class
@@ -84,6 +87,10 @@ abstract class Test extends TestCase
     {
         $this->instance = $instance;
 
+        if (!class_exists(get_class($this->instance))) {
+            throw new ReflectionException('The class does not exist');
+        }
+
         $this->reflectionClass = new ReflectionClass($this->instance);
     }
 
@@ -92,7 +99,7 @@ abstract class Test extends TestCase
      *
      * @param string $method [Name of the private or protected method that you
      * want to get and execute]
-     * @param array|null $args [Optional parameter that allows you to specify the
+     * @param array<string, mixed>|null $args [Optional parameter that allows you to specify the
      * arguments that will be passed to the method when it is invoked]
      *
      * @return mixed
@@ -163,19 +170,21 @@ abstract class Test extends TestCase
         if (is_dir($dir)) {
             $objects = scandir($dir);
 
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    $path = $dir . '/' . $object;
+            if (is_array($objects)) {
+                foreach ($objects as $object) {
+                    if ($object != '.' && $object != '..') {
+                        $path = $dir . '/' . $object;
 
-                    if (is_dir($path)) {
-                        $this->rmdirRecursively($path);
-                    } else {
-                        unlink($path);
+                        if (is_dir($path)) {
+                            $this->rmdirRecursively($path);
+                        } else {
+                            unlink($path);
+                        }
                     }
                 }
-            }
 
-            rmdir($dir);
+                rmdir($dir);
+            }
         }
     }
 
@@ -213,9 +222,19 @@ abstract class Test extends TestCase
         string $path = './storage/',
         string $fileName = 'image.png'
     ): void {
+        if ($x <= 0 || $y <= 0) {
+            throw new InvalidArgumentException("Width and height must be greater than 0.");
+        }
+
         $image = imagecreatetruecolor($x, $y);
 
-        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        $color = imagecolorallocate($image, 255, 255, 255);
+
+        if ($color === false) {
+            throw new RuntimeException("Failed to allocate color.");
+        }
+
+        imagefill($image, 0, 0, $color);
 
         imagepng($image, "{$path}{$fileName}");
     }
@@ -225,7 +244,7 @@ abstract class Test extends TestCase
      *
      * @param string $json [JSON string to parse and compare with the provided
      * data structure]
-     * @param array $options [Expected data structure expected to be present
+     * @param array<string, mixed> $options [Expected data structure expected to be present
      * in the JSON]
      *
      * @return void
@@ -256,7 +275,7 @@ abstract class Test extends TestCase
      * instance of that class
      *
      * @param object $instance [Object whose type you want to verify]
-     * @param array $instances [Array containing the names of the classes
+     * @param array<class-string> $instances [Array containing the names of the classes
      * with which you want to compare the object]
      *
      * @return void
@@ -276,9 +295,9 @@ abstract class Test extends TestCase
      * @param Closure $callback [Anonymous function to be executed within the
      * context of output buffering]
      *
-     * @return string|false
+     * @return string
      */
-    final public function assertWithOb(string $output, Closure $callback): string|false
+    final public function assertWithOb(string $output, Closure $callback): string
     {
         ob_start();
 
@@ -301,6 +320,10 @@ abstract class Test extends TestCase
      */
     final public function getResponse(string $message, string $messageSplit): string
     {
+        if ($messageSplit === '') {
+            throw new InvalidArgumentException("Separator cannot be an empty string.");
+        }
+
         $split = explode($messageSplit, $message);
 
         return trim(end($split));
@@ -312,8 +335,6 @@ abstract class Test extends TestCase
      * @param Closure $callback [Function that executes the exception]
      *
      * @return GlobalException|null
-     *
-     * @throws GlobalException [If you get an exception]
      */
     final public function getExceptionFromApi(Closure $callback): ?GlobalException
     {
@@ -339,13 +360,17 @@ abstract class Test extends TestCase
     {
         if (null === $callback) {
             /** @var Exception $lionException */
-            $lionException = new ($this->exception)(
+            $lionException = new ($this->exception)(  // Asegúrate de que $this->exception sea una clase válida
                 $this->exceptionMessage,
                 $this->exceptionStatus,
                 $this->exceptionCode
             );
 
-            $this->expectException($this->exception);
+            if (!is_subclass_of($this->exception, Throwable::class)) {
+                throw new InvalidArgumentException("The exception must be a subclass of Throwable.");
+            }
+
+            $this->expectException($this->exception);  // La clase de excepción ahora es válida
             $this->expectExceptionMessage($this->exceptionMessage);
             $this->assertSame($this->exceptionStatus, $lionException->getStatus());
             $this->expectExceptionCode($this->exceptionCode);
@@ -362,6 +387,7 @@ abstract class Test extends TestCase
             }
         }
     }
+
 
     /**
      * Initialize an exception
@@ -408,11 +434,11 @@ abstract class Test extends TestCase
     /**
      * Initialize the exception code
      *
-     * @param int $exceptionCode [Exception code]
+     * @param int|string $exceptionCode [Exception code]
      *
      * @return Test
      */
-    final public function exceptionCode(int $exceptionCode): Test
+    final public function exceptionCode(int|string $exceptionCode): Test
     {
         $this->exceptionCode = $exceptionCode;
 
