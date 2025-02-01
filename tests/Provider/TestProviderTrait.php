@@ -9,7 +9,7 @@ use Tests\Provider\TestProviderInterface;
 trait TestProviderTrait
 {
     /**
-     * @return array<array{instance: object, instances: string[]}>
+     * @return array<int, array{instance: mixed, instances: array<int, class-string>}>
      */
     public static function assertInstancesProvider(): array
     {
@@ -22,21 +22,21 @@ trait TestProviderTrait
         return [
             [
                 'instance' => $instance1,
-                'instances' => [$instance1::class]
+                'instances' => [$instance1::class],
             ],
             [
                 'instance' => $instance1,
-                'instances' => [TestProviderInterface::class]
+                'instances' => [TestProviderInterface::class],
             ],
             [
                 'instance' => $instance1,
-                'instances' => [$instance1::class, TestProviderInterface::class]
-            ]
+                'instances' => [$instance1::class, TestProviderInterface::class],
+            ],
         ];
     }
 
     /**
-     * @return array<array{text: string, split: string, return: string}>
+     * @return array<int, array{text: string, split: string, return: string}>
      */
     public static function getResponseProvider(): array
     {
@@ -55,7 +55,7 @@ trait TestProviderTrait
     }
 
     /**
-     * @return array<array{date: string, format: string}>
+     * @return array<int, array{date: string, format: string}>
      */
     public static function assertIsDateProvider(): array
     {
@@ -72,7 +72,7 @@ trait TestProviderTrait
     }
 
     /**
-     * @return array<array{header: string, headerValue: string}>
+     * @return array<int, array{header: string, headerValue: string}>
      */
     public static function assertHeaderNotHasKeyProvider(): array
     {
@@ -102,7 +102,7 @@ trait TestProviderTrait
     }
 
     /**
-     * @return array<array{key: string, global: string, value: mixed}>
+     * @return array<int, array{key: string, global: string, value: mixed}>
      */
     public static function assertHttpBodyNotHasKeyProvider(): array
     {
