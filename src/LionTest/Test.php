@@ -21,7 +21,7 @@ use Throwable;
  *
  * @property ReflectionClass<object> $reflectionClass [Object of ReflectionClass
  * class]
- * @property object $instance [Object that will be reflected]
+ * @property mixed $instance [Object that will be reflected]
  * @property string $exception [Exception class]
  * @property string $exceptionMessage [Exception message]
  * @property string $exceptionStatus [Exception response status]
@@ -41,9 +41,9 @@ abstract class Test extends TestCase
     /**
      * [Object that will be reflected]
      *
-     * @var object|null $instance
+     * @var mixed $instance
      */
-    private ?object $instance = null;
+    private mixed $instance;
 
     /**
      * [Exception class]
@@ -76,18 +76,24 @@ abstract class Test extends TestCase
     /**
      * Initializes the object to perform a reflection on a class
      *
-     * @param object $instance [Object of any type that is subjected to
+     * @param mixed $instance [Object of any type that is subjected to
      * reflection]
      *
      * @return void
      *
      * @throws ReflectionException
      */
-    final public function initReflection(object $instance): void
+    final public function initReflection(mixed $instance): void
     {
+        if (!is_object($instance)) {
+            throw new ReflectionException('The provided instance is not an object');
+        }
+
         $this->instance = $instance;
 
-        if (!class_exists(get_class($this->instance))) {
+        $className = get_class($this->instance);
+
+        if (!class_exists($className)) {
             throw new ReflectionException('The class does not exist');
         }
 
@@ -99,24 +105,22 @@ abstract class Test extends TestCase
      *
      * @param string $method [Name of the private or protected method that you
      * want to get and execute]
-     * @param array<string, mixed>|null $args [Optional parameter that allows you to specify the
-     * arguments that will be passed to the method when it is invoked]
+     * @param array<int|string, mixed> $args [Optional parameter that allows you
+     * to specify the arguments that will be passed to the method when it is
+     * invoked]
      *
      * @return mixed
      *
      * @throws ReflectionException
      */
-    final public function getPrivateMethod(string $method, ?array $args = null): mixed
+    final public function getPrivateMethod(string $method, array $args = []): mixed
     {
-        $reflectionMethod = $this->reflectionClass->getMethod($method);
+        /** @var object $instance */
+        $instance = $this->instance;
 
-        $reflectionMethod->setAccessible(true);
-
-        if (is_array($args)) {
-            return $reflectionMethod->invokeArgs($this->instance, $args);
-        }
-
-        return $reflectionMethod->invoke($this->instance);
+        return $this->reflectionClass
+            ->getMethod($method)
+            ->invokeArgs($instance, $args);
     }
 
     /**
@@ -131,11 +135,12 @@ abstract class Test extends TestCase
      */
     final public function getPrivateProperty(string $property): mixed
     {
-        $customProperty = $this->reflectionClass->getProperty($property);
+        /** @var object $instance */
+        $instance = $this->instance;
 
-        $customProperty->setAccessible(true);
-
-        return $customProperty->getValue($this->instance);
+        return $this->reflectionClass
+            ->getProperty($property)
+            ->getValue($instance);
     }
 
     /**
@@ -151,11 +156,12 @@ abstract class Test extends TestCase
      */
     final public function setPrivateProperty(string $property, mixed $value): void
     {
-        $customProperty = $this->reflectionClass->getProperty($property);
+        /** @var object $instance */
+        $instance = $this->instance;
 
-        $customProperty->setAccessible(true);
-
-        $customProperty->setValue($this->instance, $value);
+        $this->reflectionClass
+            ->getProperty($property)
+            ->setValue($instance, $value);
     }
 
     /**
@@ -200,7 +206,7 @@ abstract class Test extends TestCase
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
-                throw new RuntimeException("could not create directory: {$directory}");
+                throw new RuntimeException("Could not create directory: {$directory}");
             }
         }
     }
@@ -230,7 +236,7 @@ abstract class Test extends TestCase
 
         $color = imagecolorallocate($image, 255, 255, 255);
 
-        if ($color === false) {
+        if (!$color) {
             throw new RuntimeException("Failed to allocate color.");
         }
 
@@ -274,13 +280,13 @@ abstract class Test extends TestCase
      * Method to perform an assertion of an object to test if it is an
      * instance of that class
      *
-     * @param object $instance [Object whose type you want to verify]
-     * @param array<class-string> $instances [Array containing the names of the classes
-     * with which you want to compare the object]
+     * @param mixed $instance [Object whose type you want to verify]
+     * @param array<int, class-string> $instances [Array containing the names of
+     * the classes with which you want to compare the object]
      *
      * @return void
      */
-    final public function assertInstances(object $instance, array $instances): void
+    final public function assertInstances(mixed $instance, array $instances): void
     {
         foreach ($instances as $class) {
             $this->assertInstanceOf($class, $instance);
@@ -320,8 +326,8 @@ abstract class Test extends TestCase
      */
     final public function getResponse(string $message, string $messageSplit): string
     {
-        if ($messageSplit === '') {
-            throw new InvalidArgumentException("Separator cannot be an empty string.");
+        if ('' === $messageSplit) {
+            throw new InvalidArgumentException("Separator cannot be an empty string");
         }
 
         $split = explode($messageSplit, $message);
@@ -360,17 +366,17 @@ abstract class Test extends TestCase
     {
         if (null === $callback) {
             /** @var Exception $lionException */
-            $lionException = new ($this->exception)(  // Asegúrate de que $this->exception sea una clase válida
+            $lionException = new $this->exception(
                 $this->exceptionMessage,
                 $this->exceptionStatus,
                 $this->exceptionCode
             );
 
             if (!is_subclass_of($this->exception, Throwable::class)) {
-                throw new InvalidArgumentException("The exception must be a subclass of Throwable.");
+                throw new InvalidArgumentException("The exception must be a subclass of Throwable");
             }
 
-            $this->expectException($this->exception);  // La clase de excepción ahora es válida
+            $this->expectException($this->exception);
             $this->expectExceptionMessage($this->exceptionMessage);
             $this->assertSame($this->exceptionStatus, $lionException->getStatus());
             $this->expectExceptionCode($this->exceptionCode);
@@ -449,7 +455,10 @@ abstract class Test extends TestCase
      * Assert that a value is a date in the specified format.
      *
      * @param string $value [The value to check]
-     * @param string $format [The date format to validate against (default is 'Y-m-d')]
+     * @param string $format [The date format to validate against (default is
+     * 'Y-m-d')]
+     *
+     * @return void
      */
     public function assertIsDate(string $value, string $format = 'Y-m-d'): void
     {
@@ -463,7 +472,7 @@ abstract class Test extends TestCase
     /**
      * Remove the $_SERVER header and assert if it does not exist
      *
-     * @param string $header [Header]
+     * @param string $header [Header name]
      *
      * @return void
      */
