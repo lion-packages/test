@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Tests;
 
 use Exception as GlobalException;
+use InvalidArgumentException;
 use JsonSerializable;
 use Lion\Exceptions\Exception;
 use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test as Testing;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Tests\Provider\ClassProvider;
@@ -47,6 +49,35 @@ class TestTest extends Test
     protected function tearDown(): void
     {
         $this->rmdirRecursively(self::STORAGE);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function initReflectionTest(): void
+    {
+        $classObject = new class {
+            /** @phpstan-ignore-next-line */
+            private int $number;
+        };
+
+        $this->initReflection($classObject);
+        $this->setPrivateProperty('number', 1);
+        $this->assertSame(1, $this->getPrivateProperty('number'));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function initReflectionValueIsNotObjectTest(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('The provided instance is not an object');
+
+        $this->initReflection(1);
     }
 
     /**
@@ -158,6 +189,20 @@ class TestTest extends Test
     }
 
     #[Testing]
+    #[TestWith(['x' => 0, 'y' => 0])]
+    #[TestWith(['x' => 0, 'y' => -1])]
+    #[TestWith(['x' => 1, 'y' => 0])]
+    #[TestWith(['x' => 1, 'y' => -1])]
+    public function createImageWithException(int $x, int $y): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Width and height must be greater than 0');
+
+        $this->createImage($x, $y);
+    }
+
+    #[Testing]
     public function assertJsonContentTest(): void
     {
         /** @var non-empty-string $json */
@@ -211,6 +256,16 @@ class TestTest extends Test
         $this->assertSame($return, $this->getResponse($text, $split));
     }
 
+    #[Testing]
+    public function getResponseSplitIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Separator cannot be an empty string');
+
+        $this->getResponse('response:', '');
+    }
+
     /**
      * @throws GlobalException
      */
@@ -227,14 +282,27 @@ class TestTest extends Test
         $this->assertSame(self::ERR_EXCEPTION_CODE, $exception->getCode());
     }
 
+    #[Testing]
+    public function getExceptionFromApiIsNullTest(): void
+    {
+        $exception = $this->getExceptionFromApi(function (): void {
+            echo (self::EXCEPTION_MESSAGE);
+        });
+
+        $this->assertNull($exception);
+    }
+
     /**
      * @throws Exception
      */
     #[Testing]
     public function expectLionExceptionIsString(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -252,8 +320,11 @@ class TestTest extends Test
     #[Testing]
     public function expectLionExceptionIsCallback(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -274,8 +345,11 @@ class TestTest extends Test
     #[Testing]
     public function exceptionTest(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -349,7 +423,6 @@ class TestTest extends Test
         $$global[$key] = $value;
 
         $this->assertHttpBodyNotHasKey($key);
-
         /** @phpstan-ignore-next-line */
         $this->assertArrayNotHasKey($key, $$global);
     }

@@ -19,14 +19,6 @@ use Throwable;
  * TestCase extended abstract test class, allows you to write unit tests in PHP
  * using the PHPUnit framework
  *
- * @property ReflectionClass<object> $reflectionClass [Object of ReflectionClass
- * class]
- * @property mixed $instance [Object that will be reflected]
- * @property string $exception [Exception class]
- * @property string $exceptionMessage [Exception message]
- * @property string $exceptionStatus [Exception response status]
- * @property int|string $exceptionCode [Exception code]
- *
  * @package Lion\Test
  */
 abstract class Test extends TestCase
@@ -82,11 +74,13 @@ abstract class Test extends TestCase
      * @return void
      *
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore
      */
     final public function initReflection(mixed $instance): void
     {
         if (!is_object($instance)) {
-            throw new ReflectionException('The provided instance is not an object');
+            throw new ReflectionException('The provided instance is not an object', 500);
         }
 
         $this->instance = $instance;
@@ -94,7 +88,7 @@ abstract class Test extends TestCase
         $className = get_class($this->instance);
 
         if (!class_exists($className)) {
-            throw new ReflectionException('The class does not exist');
+            throw new ReflectionException('The class does not exist', 500);
         }
 
         $this->reflectionClass = new ReflectionClass($this->instance);
@@ -201,12 +195,14 @@ abstract class Test extends TestCase
      * to create]
      *
      * @return void
+     *
+     * @codeCoverageIgnore
      */
     final public function createDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
-                throw new RuntimeException("Could not create directory: {$directory}");
+                throw new RuntimeException("Could not create directory: {$directory}", 500);
             }
         }
     }
@@ -221,6 +217,8 @@ abstract class Test extends TestCase
      * @param string $fileName [Name of the image file to be created]
      *
      * @return void
+     *
+     * @codeCoverageIgnore
      */
     final public function createImage(
         int $x = 100,
@@ -229,7 +227,7 @@ abstract class Test extends TestCase
         string $fileName = 'image.png'
     ): void {
         if ($x <= 0 || $y <= 0) {
-            throw new InvalidArgumentException("Width and height must be greater than 0.");
+            throw new InvalidArgumentException('Width and height must be greater than 0', 500);
         }
 
         $image = imagecreatetruecolor($x, $y);
@@ -237,7 +235,7 @@ abstract class Test extends TestCase
         $color = imagecolorallocate($image, 255, 255, 255);
 
         if (!$color) {
-            throw new RuntimeException("Failed to allocate color.");
+            throw new RuntimeException('Failed to allocate color', 500);
         }
 
         imagefill($image, 0, 0, $color);
@@ -327,7 +325,7 @@ abstract class Test extends TestCase
     final public function getResponse(string $message, string $messageSplit): string
     {
         if ('' === $messageSplit) {
-            throw new InvalidArgumentException("Separator cannot be an empty string");
+            throw new InvalidArgumentException('Separator cannot be an empty string', 500);
         }
 
         $split = explode($messageSplit, $message);
@@ -361,6 +359,8 @@ abstract class Test extends TestCase
      * @return void
      *
      * @throws Exception [If the process fails]
+     *
+     * @codeCoverageIgnore
      */
     final public function expectLionException(?Closure $callback = null): void
     {
@@ -373,7 +373,7 @@ abstract class Test extends TestCase
             );
 
             if (!is_subclass_of($this->exception, Throwable::class)) {
-                throw new InvalidArgumentException("The exception must be a subclass of Throwable");
+                throw new InvalidArgumentException('The exception must be a subclass of Throwable', 500);
             }
 
             $this->expectException($this->exception);
