@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use DateTime;
 use Exception as GlobalException;
+use InvalidArgumentException;
 use JsonSerializable;
 use Lion\Exceptions\Exception;
 use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
-use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test as Testing;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
+use Tests\Provider\ClassProvider;
 use Tests\Provider\TestProviderTrait;
 
 class TestTest extends Test
@@ -36,38 +37,13 @@ class TestTest extends Test
     private const string ERR_EXCEPTION_STATUS = 'session-error';
     private const int ERR_EXCEPTION_CODE = 500;
 
-    private mixed $customClass;
+    private ClassProvider $customClass;
 
     protected function setUp(): void
     {
         $this->createDirectory(self::URL_PATH);
 
-        $this->customClass = new class
-        {
-            private int $bits = 100;
-
-            public function setBits(int $bits): void
-            {
-                $this->bits = $bits;
-            }
-
-            private function getBits(): int
-            {
-                return $this->bits;
-            }
-
-            private function subtractBits(int $bits): void
-            {
-                $this->bits -= $bits;
-            }
-
-            private function resultBits(int $bits): int
-            {
-                $this->bits -= $bits;
-
-                return $this->getBits();
-            }
-        };
+        $this->customClass = new ClassProvider();
     }
 
     protected function tearDown(): void
@@ -78,7 +54,37 @@ class TestTest extends Test
     /**
      * @throws ReflectionException
      */
-    public function testGetPrivateMethod(): void
+    #[Testing]
+    public function initReflectionTest(): void
+    {
+        $classObject = new class {
+            /** @phpstan-ignore-next-line */
+            private int $number;
+        };
+
+        $this->initReflection($classObject);
+        $this->setPrivateProperty('number', 1);
+        $this->assertSame(1, $this->getPrivateProperty('number'));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function initReflectionValueIsNotObjectTest(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('The provided instance is not an object');
+
+        $this->initReflection(1);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getPrivateMethodTest(): void
     {
         $this->initReflection($this->customClass);
 
@@ -93,7 +99,8 @@ class TestTest extends Test
     /**
      * @throws ReflectionException
      */
-    public function testGetPrivateMethodWithArguments(): void
+    #[Testing]
+    public function getPrivateMethodWithArguments(): void
     {
         $this->initReflection($this->customClass);
 
@@ -108,7 +115,8 @@ class TestTest extends Test
     /**
      * @throws ReflectionException
      */
-    public function testGetPrivateMethodWithArgumentsAndReturn(): void
+    #[Testing]
+    public function getPrivateMethodWithArgumentsAndReturn(): void
     {
         $this->initReflection($this->customClass);
 
@@ -123,7 +131,8 @@ class TestTest extends Test
     /**
      * @throws ReflectionException
      */
-    public function testGetPrivateProperty(): void
+    #[Testing]
+    public function getPrivatePropertyTest(): void
     {
         $this->initReflection($this->customClass);
 
@@ -135,7 +144,8 @@ class TestTest extends Test
     /**
      * @throws ReflectionException
      */
-    public function testSetPrivateProperty(): void
+    #[Testing]
+    public function setPrivatePropertyTest(): void
     {
         $this->initReflection($this->customClass);
 
@@ -144,7 +154,8 @@ class TestTest extends Test
         $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
     }
 
-    public function testRmdirRecursively(): void
+    #[Testing]
+    public function rmdirRecursivelyTest(): void
     {
         $this->createDirectory(self::URL_PATH);
 
@@ -153,36 +164,60 @@ class TestTest extends Test
         $this->assertFalse(is_dir(self::URL_PATH));
     }
 
-    public function testCreateDirectory(): void
+    #[Testing]
+    public function createDirectoryTest(): void
     {
         $this->createDirectory(self::URL_PATH);
 
         $this->assertTrue(is_dir(self::URL_PATH));
     }
 
-    public function testCreateImageDefaultValues(): void
+    #[Testing]
+    public function createImageDefaultValues(): void
     {
         $this->createImage();
 
         $this->assertFileExists(self::STORAGE . self::FILE_NAME);
     }
 
-    public function testCreateImageCustomValues(): void
+    #[Testing]
+    public function createImageCustomValues(): void
     {
         $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
 
         $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
     }
 
-    public function testAssertJsonContent(): void
+    #[Testing]
+    #[TestWith(['x' => 0, 'y' => 0])]
+    #[TestWith(['x' => 0, 'y' => -1])]
+    #[TestWith(['x' => 1, 'y' => 0])]
+    #[TestWith(['x' => 1, 'y' => -1])]
+    public function createImageWithException(int $x, int $y): void
     {
-        $this->assertJsonContent(json_encode(self::JSON), ['name' => 'lion']);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Width and height must be greater than 0');
+
+        $this->createImage($x, $y);
+    }
+
+    #[Testing]
+    public function assertJsonContentTest(): void
+    {
+        /** @var non-empty-string $json */
+        $json = json_encode(self::JSON);
+
+        $this->assertJsonContent($json, [
+            'name' => 'lion',
+        ]);
     }
 
     /**
      * @throws ReflectionException
      */
-    public function testAssertPropertyValue(): void
+    #[Testing]
+    public function assertPropertyValueTest(): void
     {
         $this->initReflection($this->customClass);
 
@@ -191,29 +226,51 @@ class TestTest extends Test
         $this->assertPropertyValue('bits', self::BITS);
     }
 
+    /**
+     * Match instances of an object
+     *
+     * @param mixed $instance [Instance object]
+     * @param array<int, class-string> $instances [List of instance objects]
+     *
+     * @return void
+     */
+    #[Testing]
     #[DataProvider('assertInstancesProvider')]
-    public function testAssertInstances(object $instance, array|string $instances): void
+    public function assertInstancesTest(mixed $instance, array $instances): void
     {
         $this->assertInstances($instance, $instances);
     }
 
-    public function testAssertWithOb(): void
+    #[Testing]
+    public function assertWithObTest(): void
     {
         $this->assertWithOb(self::MESSAGE, function (): void {
             echo (self::MESSAGE);
         });
     }
 
+    #[Testing]
     #[DataProvider('getResponseProvider')]
-    public function testGetResponse(string $text, string $split, string $return): void
+    public function getResponseTest(string $text, string $split, string $return): void
     {
         $this->assertSame($return, $this->getResponse($text, $split));
+    }
+
+    #[Testing]
+    public function getResponseSplitIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Separator cannot be an empty string');
+
+        $this->getResponse('response:', '');
     }
 
     /**
      * @throws GlobalException
      */
-    public function testGetExceptionFromApi(): void
+    #[Testing]
+    public function getExceptionFromApiTest(): void
     {
         $exception = $this->getExceptionFromApi(function (): void {
             throw new GlobalException(self::EXCEPTION_MESSAGE, self::ERR_EXCEPTION_CODE);
@@ -225,13 +282,27 @@ class TestTest extends Test
         $this->assertSame(self::ERR_EXCEPTION_CODE, $exception->getCode());
     }
 
+    #[Testing]
+    public function getExceptionFromApiIsNullTest(): void
+    {
+        $exception = $this->getExceptionFromApi(function (): void {
+            echo (self::EXCEPTION_MESSAGE);
+        });
+
+        $this->assertNull($exception);
+    }
+
     /**
      * @throws Exception
      */
-    public function testExpectLionExceptionIsString(): void
+    #[Testing]
+    public function expectLionExceptionIsString(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -246,10 +317,14 @@ class TestTest extends Test
     /**
      * @throws Exception
      */
-    public function testExpectLionExceptionIsCallback(): void
+    #[Testing]
+    public function expectLionExceptionIsCallback(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -267,10 +342,14 @@ class TestTest extends Test
             });
     }
 
-    public function testException(): void
+    #[Testing]
+    public function exceptionTest(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class (
+            self::ERR_EXCEPTION_MESSAGE,
+            self::ERR_EXCEPTION_STATUS,
+            self::ERR_EXCEPTION_CODE
+        ) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -280,7 +359,8 @@ class TestTest extends Test
         ]);
     }
 
-    public function testExceptionMessage(): void
+    #[Testing]
+    public function exceptionMessageTest(): void
     {
         $this->assertInstances($this->exceptionMessage(self::EXCEPTION_MESSAGE), [
             Test::class,
@@ -288,7 +368,8 @@ class TestTest extends Test
         ]);
     }
 
-    public function testExceptionStatus(): void
+    #[Testing]
+    public function exceptionStatusTest(): void
     {
         $this->assertInstances($this->exceptionStatus(self::ERR_EXCEPTION_STATUS), [
             Test::class,
@@ -296,7 +377,8 @@ class TestTest extends Test
         ]);
     }
 
-    public function testExceptionCode(): void
+    #[Testing]
+    public function exceptionCodeTest(): void
     {
         $this->assertInstances($this->exceptionCode(self::ERR_EXCEPTION_CODE), [
             Test::class,
@@ -304,14 +386,16 @@ class TestTest extends Test
         ]);
     }
 
+    #[Testing]
     #[DataProvider('assertIsDateProvider')]
-    public function testAssertIsDate(string $date, string $format): void
+    public function assertIsDateTest(string $date, string $format): void
     {
         $this->assertIsDate($date, $format);
     }
 
+    #[Testing]
     #[DataProvider('assertHeaderNotHasKeyProvider')]
-    public function testAssertHeaderNotHasKey(string $header, string $headerValue): void
+    public function assertHeaderNotHasKeyTest(string $header, string $headerValue): void
     {
         $_SERVER[$header] = $headerValue;
 
@@ -320,15 +404,26 @@ class TestTest extends Test
         $this->assertHeaderNotHasKey($header);
     }
 
+    /**
+     * Match and strip values from values sent over HTTP
+     *
+     * @param string $key [Body index]
+     * @param string $global [Global variable]
+     * @param array<string, string>|string $value [Value of the body]
+     *
+     * @return void
+     */
+    #[Testing]
     #[DataProvider('assertHttpBodyNotHasKeyProvider')]
-    public function testAssertHttpBodyNotHasKey(string $key, string $global, array|string $value): void
+    public function assertHttpBodyNotHasKeyTest(string $key, string $global, array|string $value): void
     {
         global $$global;
 
+        /** @phpstan-ignore-next-line */
         $$global[$key] = $value;
 
         $this->assertHttpBodyNotHasKey($key);
-
+        /** @phpstan-ignore-next-line */
         $this->assertArrayNotHasKey($key, $$global);
     }
 }
