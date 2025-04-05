@@ -1,36 +1,77 @@
+# 🦁 Lion-Test
+
 <p align="center">
-  <a href="https://lion-client.vercel.app/" target="_blank">
-    <img
-         src="https://github.com/lion-packages/mailer/assets/132396080/b4a5f07a-0035-4f07-b998-ef3adb32eaec"
-         width="300"
-         alt="Lion-Framework Logo"
+  <a href="https://dev.lion-packages.com/docs/library/content">
+    <img 
+        src="https://github.com/lion-packages/framework/assets/56183278/60871c9f-1c93-4481-8c1e-d70282b33254"
+        width="450" 
+        alt="Lion-Packages Logo"
     >
   </a>
 </p>
 
 <p align="center">
-  <img src="https://poser.pugx.org/lion/test/v" alt="Latest Stable Version">
-  <img src="https://poser.pugx.org/lion/test/downloads" alt="Total Downloads">
-  <img src="https://poser.pugx.org/lion/test/license" alt="License">
-  <img src="https://poser.pugx.org/lion/test/require/php" alt="PHP Version Require">
+  <a href="https://packagist.org/packages/lion/test">
+    <img src="https://poser.pugx.org/lion/test/v" alt="Latest Stable Version">
+  </a>
+  <a href="https://packagist.org/packages/lion/test">
+    <img src="https://poser.pugx.org/lion/test/downloads" alt="Total Downloads">
+  </a>
+  <a href="https://github.com/lion-packages/test/blob/main/LICENSE">
+    <img src="https://poser.pugx.org/lion/test/license" alt="License">
+  </a>
+  <a href="https://www.php.net/">
+    <img src="https://poser.pugx.org/lion/test/require/php" alt="PHP Version Require">
+  </a>
 </p>
 
-## About Lion-Test
+🚀 **Lion-Test** library to implement testing with helpers that allow easy testing with PHPUnit.
 
-Lion-Test is a library designed to enhance PHPUnit testing by extending the TestCase class and adding additional functions to simplify test development. This library aims to streamline the process of creating, managing, and running tests, allowing developers to focus on essential logic and reduce boilerplate code.
+---
 
-Features
+## 📖 Features
 
-- Easy-to-use assertions beyond the default PHPUnit set.
-- Custom helper functions for common testing patterns.
-- Integration with PHPUnit for seamless test execution.
+✔️ Easy-to-use assertions beyond the default PHPUnit set.  
+✔️ Custom helper functions for common test patterns.  
+✔️ Integration with PHPUnit for seamless test execution.  
 
-## Install
+---
+
+## 📦 Installation
+
+Install the test using **Composer**:
 
 ```bash
-composer require --dev lion/test
+composer require --dev phpunit/phpunit lion/test
 ```
 
-## License
+## Usage Example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Tests;
+
+use Lion\Test\Test;
+use PHPUnit\Framework\Attributes\Test as Testing;
+
+class ExampleTest extends Test
+{
+    protected function setUp(): void
+    {
+        $this->initReflection(new ExampleController());
+    }
+
+    #[Testing]
+    public function example(): void
+    {
+        $this->assertPropertyValue('id', 1);
+    }
+}
+```
+
+## 📝 License
 
 The <strong>test</strong> is open-sourced software licensed under the [MIT License](https://github.com/lion-packages/test/blob/main/LICENSE).
