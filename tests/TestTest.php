@@ -25,7 +25,7 @@ class TestTest extends Test
     private const int BITS = 16;
     private const int X = 200;
     private const int Y = 150;
-    private const string PROPIERTY = 'bits';
+    private const string PROPERTY = 'bits';
     private const string STORAGE = './storage/';
     private const string URL_PATH = self::STORAGE . 'example/';
     private const string FILE_NAME = 'image.png';
@@ -88,7 +88,7 @@ class TestTest extends Test
     {
         $this->initReflection($this->customClass);
 
-        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $this->setPrivateProperty(self::PROPERTY, 100);
 
         $bits = $this->getPrivateMethod('getBits');
 
@@ -104,12 +104,12 @@ class TestTest extends Test
     {
         $this->initReflection($this->customClass);
 
-        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $this->setPrivateProperty(self::PROPERTY, 100);
 
         $this->getPrivateMethod('subtractBits', [self::BITS]);
 
-        $this->assertIsInt($this->getPrivateProperty(self::PROPIERTY));
-        $this->assertSame(84, $this->getPrivateProperty(self::PROPIERTY));
+        $this->assertIsInt($this->getPrivateProperty(self::PROPERTY));
+        $this->assertSame(84, $this->getPrivateProperty(self::PROPERTY));
     }
 
     /**
@@ -120,7 +120,7 @@ class TestTest extends Test
     {
         $this->initReflection($this->customClass);
 
-        $this->setPrivateProperty(self::PROPIERTY, 100);
+        $this->setPrivateProperty(self::PROPERTY, 100);
 
         $result = $this->getPrivateMethod('resultBits', [self::BITS]);
 
@@ -138,7 +138,7 @@ class TestTest extends Test
 
         $this->customClass->setBits(self::BITS);
 
-        $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
+        $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPERTY));
     }
 
     /**
@@ -149,9 +149,9 @@ class TestTest extends Test
     {
         $this->initReflection($this->customClass);
 
-        $this->setPrivateProperty(self::PROPIERTY, self::BITS);
+        $this->setPrivateProperty(self::PROPERTY, self::BITS);
 
-        $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPIERTY));
+        $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPERTY));
     }
 
     #[Testing]
@@ -286,7 +286,6 @@ class TestTest extends Test
     public function getExceptionFromApiIsNullTest(): void
     {
         $exception = $this->getExceptionFromApi(function (): void {
-            echo (self::EXCEPTION_MESSAGE);
         });
 
         $this->assertNull($exception);

@@ -77,7 +77,7 @@ abstract class Test extends TestCase
      *
      * @codeCoverageIgnore
      */
-    final public function initReflection(mixed $instance): void
+    final protected function initReflection(mixed $instance): void
     {
         if (!is_object($instance)) {
             throw new ReflectionException('The provided instance is not an object', 500);
@@ -106,8 +106,10 @@ abstract class Test extends TestCase
      * @return mixed
      *
      * @throws ReflectionException
+     *
+     * @infection-ignore-all
      */
-    final public function getPrivateMethod(string $method, array $args = []): mixed
+    final protected function getPrivateMethod(string $method, array $args = []): mixed
     {
         /** @var object $instance */
         $instance = $this->instance;
@@ -126,8 +128,10 @@ abstract class Test extends TestCase
      * @return mixed
      *
      * @throws ReflectionException
+     *
+     * @infection-ignore-all
      */
-    final public function getPrivateProperty(string $property): mixed
+    final protected function getPrivateProperty(string $property): mixed
     {
         /** @var object $instance */
         $instance = $this->instance;
@@ -147,8 +151,10 @@ abstract class Test extends TestCase
      * @return void
      *
      * @throws ReflectionException
+     *
+     * @infection-ignore-all
      */
-    final public function setPrivateProperty(string $property, mixed $value): void
+    final protected function setPrivateProperty(string $property, mixed $value): void
     {
         /** @var object $instance */
         $instance = $this->instance;
@@ -164,8 +170,10 @@ abstract class Test extends TestCase
      * @param string $dir [Directory to be deleted recursively]
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    final public function rmdirRecursively(string $dir): void
+    final protected function rmdirRecursively(string $dir): void
     {
         if (is_dir($dir)) {
             $objects = scandir($dir);
@@ -198,7 +206,7 @@ abstract class Test extends TestCase
      *
      * @codeCoverageIgnore
      */
-    final public function createDirectory(string $directory): void
+    final protected function createDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0777, true)) {
@@ -220,7 +228,7 @@ abstract class Test extends TestCase
      *
      * @codeCoverageIgnore
      */
-    final public function createImage(
+    final protected function createImage(
         int $x = 100,
         int $y = 100,
         string $path = './storage/',
@@ -252,10 +260,18 @@ abstract class Test extends TestCase
      * in the JSON]
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    final public function assertJsonContent(string $json, array $options): void
+    final protected function assertJsonContent(string $json, array $options): void
     {
-        $this->assertSame($options, json_decode($json, true));
+        $jsonEncode = json_encode($options, JSON_PRETTY_PRINT);
+
+        if (!is_string($jsonEncode)) {
+            throw new RuntimeException('Failed to convert JSON to string', 500);
+        }
+
+        $this->assertJsonStringEqualsJsonString($json, $jsonEncode);
     }
 
     /**
@@ -268,8 +284,10 @@ abstract class Test extends TestCase
      * @return void
      *
      * @throws ReflectionException
+     *
+     * @infection-ignore-all
      */
-    final public function assertPropertyValue(string $property, mixed $value): void
+    final protected function assertPropertyValue(string $property, mixed $value): void
     {
         $this->assertSame($value, $this->getPrivateProperty($property));
     }
@@ -283,8 +301,10 @@ abstract class Test extends TestCase
      * the classes with which you want to compare the object]
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    final public function assertInstances(mixed $instance, array $instances): void
+    final protected function assertInstances(mixed $instance, array $instances): void
     {
         foreach ($instances as $class) {
             $this->assertInstanceOf($class, $instance);
@@ -300,8 +320,10 @@ abstract class Test extends TestCase
      * context of output buffering]
      *
      * @return string
+     *
+     * @infection-ignore-all
      */
-    final public function assertWithOb(string $output, Closure $callback): string
+    final protected function assertWithOb(string $output, Closure $callback): string
     {
         ob_start();
 
@@ -321,8 +343,10 @@ abstract class Test extends TestCase
      * @param string $messageSplit [Separation text]
      *
      * @return string
+     *
+     * @infection-ignore-all
      */
-    final public function getResponse(string $message, string $messageSplit): string
+    final protected function getResponse(string $message, string $messageSplit): string
     {
         if ('' === $messageSplit) {
             throw new InvalidArgumentException('Separator cannot be an empty string', 500);
@@ -339,8 +363,10 @@ abstract class Test extends TestCase
      * @param Closure $callback [Function that executes the exception]
      *
      * @return GlobalException|null
+     *
+     * @infection-ignore-all
      */
-    final public function getExceptionFromApi(Closure $callback): ?GlobalException
+    final protected function getExceptionFromApi(Closure $callback): ?GlobalException
     {
         try {
             $callback();
@@ -362,7 +388,7 @@ abstract class Test extends TestCase
      *
      * @codeCoverageIgnore
      */
-    final public function expectLionException(?Closure $callback = null): void
+    final protected function expectLionException(?Closure $callback = null): void
     {
         if (null === $callback) {
             /** @var Exception $lionException */
@@ -401,8 +427,10 @@ abstract class Test extends TestCase
      * @param string $exception [Exception class]
      *
      * @return Test
+     *
+     * @infection-ignore-all
      */
-    final public function exception(string $exception): Test
+    final protected function exception(string $exception): Test
     {
         $this->exception = $exception;
 
@@ -415,8 +443,10 @@ abstract class Test extends TestCase
      * @param string $exceptionMessage [Exception message]
      *
      * @return Test
+     *
+     * @infection-ignore-all
      */
-    final public function exceptionMessage(string $exceptionMessage): Test
+    final protected function exceptionMessage(string $exceptionMessage): Test
     {
         $this->exceptionMessage = $exceptionMessage;
 
@@ -429,8 +459,10 @@ abstract class Test extends TestCase
      * @param string $exceptionStatus [Exception response status]
      *
      * @return Test
+     *
+     * @infection-ignore-all
      */
-    final public function exceptionStatus(string $exceptionStatus): Test
+    final protected function exceptionStatus(string $exceptionStatus): Test
     {
         $this->exceptionStatus = $exceptionStatus;
 
@@ -443,8 +475,10 @@ abstract class Test extends TestCase
      * @param int|string $exceptionCode [Exception code]
      *
      * @return Test
+     *
+     * @infection-ignore-all
      */
-    final public function exceptionCode(int|string $exceptionCode): Test
+    final protected function exceptionCode(int|string $exceptionCode): Test
     {
         $this->exceptionCode = $exceptionCode;
 
@@ -459,8 +493,10 @@ abstract class Test extends TestCase
      * 'Y-m-d')]
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    public function assertIsDate(string $value, string $format = 'Y-m-d'): void
+    protected function assertIsDate(string $value, string $format = 'Y-m-d'): void
     {
         $date = DateTime::createFromFormat($format, $value);
 
@@ -475,8 +511,10 @@ abstract class Test extends TestCase
      * @param string $header [Header name]
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    final public function assertHeaderNotHasKey(string $header): void
+    final protected function assertHeaderNotHasKey(string $header): void
     {
         unset($_SERVER[$header]);
 
@@ -490,8 +528,10 @@ abstract class Test extends TestCase
      * @param string $key
      *
      * @return void
+     *
+     * @infection-ignore-all
      */
-    final public function assertHttpBodyNotHasKey(string $key): void
+    final protected function assertHttpBodyNotHasKey(string $key): void
     {
         if (isset($_SERVER[$key])) {
             $this->assertHeaderNotHasKey($key);
