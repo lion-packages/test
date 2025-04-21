@@ -13,7 +13,7 @@ trait TestProviderTrait
      */
     public static function assertInstancesProvider(): array
     {
-        $instance1 = new class implements TestProviderInterface {
+        $instance1 = new class () implements TestProviderInterface {
             public function exampleMethod(): void
             {
             }
