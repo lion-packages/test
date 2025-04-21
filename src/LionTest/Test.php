@@ -372,7 +372,7 @@ abstract class Test extends TestCase
             $callback();
 
             return null;
-        } catch (GlobalException $e) {
+        } catch (GlobalException $e){
             return $e;
         }
     }
