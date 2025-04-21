@@ -286,6 +286,7 @@ jobs:
             xdebug.start_with_request=yes
             xdebug.log_level=0
           tools: composer
+          
 
       - name: Restore composer.lock from cache
         uses: actions/cache@v4
