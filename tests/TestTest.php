@@ -57,7 +57,7 @@ class TestTest extends Test
     #[Testing]
     public function initReflectionTest(): void
     {
-        $classObject = new class {
+        $classObject = new class () {
             /** @phpstan-ignore-next-line */
             private int $number;
         };
@@ -245,7 +245,7 @@ class TestTest extends Test
     public function assertWithObTest(): void
     {
         $this->assertWithOb(self::MESSAGE, function (): void {
-            echo (self::MESSAGE);
+            echo(self::MESSAGE);
         });
     }
 
@@ -297,11 +297,7 @@ class TestTest extends Test
     #[Testing]
     public function expectLionExceptionIsString(): void
     {
-        $customException = new class (
-            self::ERR_EXCEPTION_MESSAGE,
-            self::ERR_EXCEPTION_STATUS,
-            self::ERR_EXCEPTION_CODE
-        ) extends Exception implements JsonSerializable {
+        $customException = new class (self::ERR_EXCEPTION_MESSAGE, self::ERR_EXCEPTION_STATUS, self::ERR_EXCEPTION_CODE) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -319,11 +315,7 @@ class TestTest extends Test
     #[Testing]
     public function expectLionExceptionIsCallback(): void
     {
-        $customException = new class (
-            self::ERR_EXCEPTION_MESSAGE,
-            self::ERR_EXCEPTION_STATUS,
-            self::ERR_EXCEPTION_CODE
-        ) extends Exception implements JsonSerializable {
+        $customException = new class (self::ERR_EXCEPTION_MESSAGE, self::ERR_EXCEPTION_STATUS, self::ERR_EXCEPTION_CODE) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -344,11 +336,7 @@ class TestTest extends Test
     #[Testing]
     public function exceptionTest(): void
     {
-        $customException = new class (
-            self::ERR_EXCEPTION_MESSAGE,
-            self::ERR_EXCEPTION_STATUS,
-            self::ERR_EXCEPTION_CODE
-        ) extends Exception implements JsonSerializable {
+        $customException = new class (self::ERR_EXCEPTION_MESSAGE, self::ERR_EXCEPTION_STATUS, self::ERR_EXCEPTION_CODE) extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
