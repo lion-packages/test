@@ -17,7 +17,7 @@ class TestTest extends Test
     const Y = 150;
     const PROPIERTY = 'bits';
     const STORAGE = './storage/';
-    const URL_PATH = self::STORAGE . 'example/';
+    const URL_PATH = self::STORAGE.'example/';
     const FILE_NAME = 'image.png';
     const FILE_NAME_CUSTOM = 'custom.png';
     const JSON = ['name' => 'lion'];
@@ -30,7 +30,7 @@ class TestTest extends Test
     {
         $this->createDirectory(self::URL_PATH);
 
-        $this->customClass = new class {
+        $this->customClass = new class() {
             private int $bits = 100;
 
             public function setBits(int $bits): void
@@ -127,14 +127,14 @@ class TestTest extends Test
     {
         $this->createImage();
 
-        $this->assertFileExists(self::STORAGE . self::FILE_NAME);
+        $this->assertFileExists(self::STORAGE.self::FILE_NAME);
     }
 
     public function testCreateImageCustomValues(): void
     {
         $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
 
-        $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
+        $this->assertFileExists(self::URL_PATH.self::FILE_NAME_CUSTOM);
     }
 
     public function testAssertJsonContent(): void
@@ -160,8 +160,8 @@ class TestTest extends Test
 
     public function testAssertWithOb(): void
     {
-        $this->assertWithOb(self::MESSAGE, function() {
-            echo(self::MESSAGE);
+        $this->assertWithOb(self::MESSAGE, function () {
+            echo self::MESSAGE;
         });
     }
 
@@ -175,7 +175,7 @@ class TestTest extends Test
 
     public function testGetExceptionFromApi(): void
     {
-        $exception = $this->getExceptionFromApi(function() {
+        $exception = $this->getExceptionFromApi(function () {
             throw new Exception(self::EXCEPTION_MESSAGE);
         });
 

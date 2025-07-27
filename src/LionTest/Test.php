@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -14,32 +14,30 @@ use RuntimeException;
  * TestCase extended abstract test class, allows you to write unit tests in PHP
  * using the PHPUnit framework.
  *
- * @property object $instance [Object that will be reflected]
+ * @property object          $instance        [Object that will be reflected]
  * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
- *
- * @package Lion\Test
  */
 abstract class Test extends TestCase
 {
     /**
-     * [Object that will be reflected]
+     * [Object that will be reflected].
      *
-     * @var object $instance
+     * @var object
      */
     private object $instance;
 
     /**
-     * [Object of ReflectionClass class]
+     * [Object of ReflectionClass class].
      *
-     * @var ReflectionClass $reflectionClass
+     * @var ReflectionClass
      */
     private ReflectionClass $reflectionClass;
 
     /**
-     * Initializes the object to perform a reflection on a class
+     * Initializes the object to perform a reflection on a class.
      *
      * @param object $instance [Object of any type that is subjected to
-     * reflection]
+     *                         reflection]
      *
      * @return void
      */
@@ -51,12 +49,12 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the private or protected methods of a reflected class
+     * Gets the private or protected methods of a reflected class.
      *
      * @param string $method [Name of the private or protected method that you
-     * want to get and execute]
-     * @param array $args [Optional parameter that allows you to specify the
-     * arguments that will be passed to the method when it is invoked]
+     *                       want to get and execute]
+     * @param array  $args   [Optional parameter that allows you to specify the
+     *                       arguments that will be passed to the method when it is invoked]
      *
      * @return mixed
      */
@@ -74,10 +72,10 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the value of a private or protected property of a reflected class
+     * Gets the value of a private or protected property of a reflected class.
      *
      * @param string $property [Name of the private or protected property
-     * whose value you want to obtain]
+     *                         whose value you want to obtain]
      *
      * @return mixed
      */
@@ -91,11 +89,11 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Sets the value of a private or protected property of a reflected class
+     * Sets the value of a private or protected property of a reflected class.
      *
      * @param string $property [Name of the private or protected property whose
-     * value you want to set]
-     * @param mixed $value [Value to assign to the specified property]
+     *                         value you want to set]
+     * @param mixed  $value    [Value to assign to the specified property]
      *
      * @return void
      */
@@ -109,7 +107,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Delete a directory and all its contents recursively
+     * Delete a directory and all its contents recursively.
      *
      * @param string $dir [Directory to be deleted recursively]
      *
@@ -121,8 +119,8 @@ abstract class Test extends TestCase
             $objects = scandir($dir);
 
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    $path = $dir . '/' . $object;
+                if ($object != '.' && $object != '..') {
+                    $path = $dir.'/'.$object;
 
                     if (is_dir($path)) {
                         $this->rmdirRecursively($path);
@@ -137,10 +135,10 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Create folders from a defined path
+     * Create folders from a defined path.
      *
      * @param string $directory [Indicates the path of the directory you want
-     * to create]
+     *                          to create]
      *
      * @return void
      */
@@ -155,11 +153,11 @@ abstract class Test extends TestCase
 
     /**
      * Allows generating a blank image with specified dimensions and saving it
-     * to a specific path with a given file name
+     * to a specific path with a given file name.
      *
-     * @param int $x [Represents the width of the image to be created]
-     * @param int $y [Represents the height of the image to be created]
-     * @param string $path [Directory path where the image is saved]
+     * @param int    $x        [Represents the width of the image to be created]
+     * @param int    $y        [Represents the height of the image to be created]
+     * @param string $path     [Directory path where the image is saved]
      * @param string $fileName [Name of the image file to be created]
      *
      * @return void
@@ -178,12 +176,12 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Assertion to test if a JSON object is identical to the defined array
+     * Assertion to test if a JSON object is identical to the defined array.
      *
-     * @param string $json [JSON string to parse and compare with the provided
-     * data structure]
-     * @param array $options [Expected data structure expected to be present
-     * in the JSON]
+     * @param string $json    [JSON string to parse and compare with the provided
+     *                        data structure]
+     * @param array  $options [Expected data structure expected to be present
+     *                        in the JSON]
      *
      * @return void
      */
@@ -193,11 +191,11 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Makes an assertion about the value of a specific property of a class
+     * Makes an assertion about the value of a specific property of a class.
      *
      * @param string $property [Name of the property on which the assertion
-     * will be made]
-     * @param mixed $value [Expected value of the property]
+     *                         will be made]
+     * @param mixed  $value    [Expected value of the property]
      *
      * @return void
      */
@@ -208,11 +206,11 @@ abstract class Test extends TestCase
 
     /**
      * Method to perform an assertion of an object to test if it is an
-     * instance of that class
+     * instance of that class.
      *
-     * @param object $instance [Object whose type you want to verify]
-     * @param array $instances [Array containing the names of the classes
-     * with which you want to compare the object]
+     * @param object $instance  [Object whose type you want to verify]
+     * @param array  $instances [Array containing the names of the classes
+     *                          with which you want to compare the object]
      *
      * @return void
      */
@@ -225,11 +223,11 @@ abstract class Test extends TestCase
 
     /**
      * Perform assertions implementing the use of outputs in the buffer
-     * with ob_start
+     * with ob_start.
      *
-     * @param string $output [Expected Output Message]
+     * @param string  $output   [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
-     * context of output buffering]
+     *                          context of output buffering]
      *
      * @return string|false
      */
@@ -247,10 +245,10 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets a response string from the separation of a defined word
+     * Gets a response string from the separation of a defined word.
      *
-     * @param  string $message [Defined message]
-     * @param  string $messageSplit [Separation text]
+     * @param string $message      [Defined message]
+     * @param string $messageSplit [Separation text]
      *
      * @return string
      */
@@ -262,9 +260,9 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the exception object when consuming an API
+     * Gets the exception object when consuming an API.
      *
-     * @param  Closure $callback [Function that executes the exception]
+     * @param Closure $callback [Function that executes the exception]
      *
      * @return Exception
      */
