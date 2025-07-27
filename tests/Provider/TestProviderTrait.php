@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Provider;
 
-use Tests\Provider\TestProviderInterface;
-
 trait TestProviderTrait
 {
     public static function assertInstancesProvider(): array
     {
-        $instance1 = new class implements TestProviderInterface {
+        $instance1 = new class() implements TestProviderInterface {
             public function exampleMethod(): void
             {
             }
@@ -18,17 +16,17 @@ trait TestProviderTrait
 
         return [
             [
-                'instance' => $instance1,
-                'instances' => [$instance1::class]
+                'instance'  => $instance1,
+                'instances' => [$instance1::class],
             ],
             [
-                'instance' => $instance1,
-                'instances' => [TestProviderInterface::class]
+                'instance'  => $instance1,
+                'instances' => [TestProviderInterface::class],
             ],
             [
-                'instance' => $instance1,
-                'instances' => [$instance1::class, TestProviderInterface::class]
-            ]
+                'instance'  => $instance1,
+                'instances' => [$instance1::class, TestProviderInterface::class],
+            ],
         ];
     }
 
@@ -36,15 +34,15 @@ trait TestProviderTrait
     {
         return [
             [
-                'text' => 'testing in classes',
-                'split' => 'in',
-                'return' => 'classes'
+                'text'   => 'testing in classes',
+                'split'  => 'in',
+                'return' => 'classes',
             ],
             [
-                'text' => 'example test',
-                'split' => ' ',
-                'return' => 'test'
-            ]
+                'text'   => 'example test',
+                'split'  => ' ',
+                'return' => 'test',
+            ],
         ];
     }
 
@@ -52,11 +50,11 @@ trait TestProviderTrait
     {
         return [
             [
-                'date' => '2024-11-02',
+                'date'   => '2024-11-02',
                 'format' => 'Y-m-d',
             ],
             [
-                'date' => '2024-11-02 19:14:30',
+                'date'   => '2024-11-02 19:14:30',
                 'format' => 'Y-m-d H:i:s',
             ],
         ];
@@ -66,23 +64,23 @@ trait TestProviderTrait
     {
         return [
             [
-                'header' => 'HTTP_AUTHORIZATION',
+                'header'      => 'HTTP_AUTHORIZATION',
                 'headerValue' => 'bearer example.bearer.test',
             ],
             [
-                'header' => 'HTTP_CONTENT_TYPE',
+                'header'      => 'HTTP_CONTENT_TYPE',
                 'headerValue' => 'application/json',
             ],
             [
-                'header' => 'HTTP_ACCEPT_LANGUAGE',
+                'header'      => 'HTTP_ACCEPT_LANGUAGE',
                 'headerValue' => 'en-US,en;q=0.9',
             ],
             [
-                'header' => 'HTTP_USER_AGENT',
+                'header'      => 'HTTP_USER_AGENT',
                 'headerValue' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36',
             ],
             [
-                'header' => 'HTTP_X_REQUESTED_WITH',
+                'header'      => 'HTTP_X_REQUESTED_WITH',
                 'headerValue' => 'XMLHttpRequest',
             ],
         ];
@@ -92,32 +90,32 @@ trait TestProviderTrait
     {
         return [
             [
-                'key' => 'HTTP_AUTHORIZATION',
+                'key'    => 'HTTP_AUTHORIZATION',
                 'global' => '_SERVER',
-                'value' => 'bearer example.bearer.test',
+                'value'  => 'bearer example.bearer.test',
             ],
             [
-                'key' => 'page',
+                'key'    => 'page',
                 'global' => '_GET',
-                'value' => '1',
+                'value'  => '1',
             ],
             [
-                'key' => 'username',
+                'key'    => 'username',
                 'global' => '_POST',
-                'value' => 'test_user',
+                'value'  => 'test_user',
             ],
             [
-                'key' => 'file_upload',
+                'key'    => 'file_upload',
                 'global' => '_FILES',
-                'value' => [
+                'value'  => [
                     'name' => 'example.txt',
-                    'type' => 'text/plain'
+                    'type' => 'text/plain',
                 ],
             ],
             [
-                'key' => 'X-Requested-With',
+                'key'    => 'X-Requested-With',
                 'global' => '_SERVER',
-                'value' => 'XMLHttpRequest',
+                'value'  => 'XMLHttpRequest',
             ],
         ];
     }

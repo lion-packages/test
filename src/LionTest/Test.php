@@ -15,70 +15,68 @@ use RuntimeException;
 
 /**
  * TestCase extended abstract test class, allows you to write unit tests in PHP
- * using the PHPUnit framework
+ * using the PHPUnit framework.
  *
- * @property ReflectionClass $reflectionClass [Object of ReflectionClass class]
- * @property object $instance [Object that will be reflected]
- * @property string $exception [Exception class]
- * @property string $exceptionMessage [Exception message]
- * @property string $exceptionStatus [Exception response status]
- * @property string $exceptionCode [Exception code]
- *
- * @package Lion\Test
+ * @property ReflectionClass $reflectionClass  [Object of ReflectionClass class]
+ * @property object          $instance         [Object that will be reflected]
+ * @property string          $exception        [Exception class]
+ * @property string          $exceptionMessage [Exception message]
+ * @property string          $exceptionStatus  [Exception response status]
+ * @property string          $exceptionCode    [Exception code]
  */
 abstract class Test extends TestCase
 {
     /**
-     * [Object of ReflectionClass class]
+     * [Object of ReflectionClass class].
      *
-     * @var ReflectionClass $reflectionClass
+     * @var ReflectionClass
      */
     private ReflectionClass $reflectionClass;
 
     /**
-     * [Object that will be reflected]
+     * [Object that will be reflected].
      *
-     * @var object|null $instance
+     * @var object|null
      */
     private ?object $instance = null;
 
     /**
-     * [Exception class]
+     * [Exception class].
      *
-     * @var string $exception
+     * @var string
      */
     private string $exception;
 
     /**
-     * [Exception message]
+     * [Exception message].
      *
-     * @var string $exceptionMessage
+     * @var string
      */
     private string $exceptionMessage;
 
     /**
-     * [Exception response status]
+     * [Exception response status].
      *
-     * @var string $exceptionStatus
+     * @var string
      */
     private string $exceptionStatus;
 
     /**
-     * [Exception code]
+     * [Exception code].
      *
-     * @var int $exceptionCode
+     * @var int
      */
     private int $exceptionCode;
 
     /**
-     * Initializes the object to perform a reflection on a class
+     * Initializes the object to perform a reflection on a class.
      *
      * @param object $instance [Object of any type that is subjected to
-     * reflection]
-     *
-     * @return void
+     *                         reflection]
      *
      * @throws ReflectionException
+     *
+     * @return void
      */
     final public function initReflection(object $instance): void
     {
@@ -88,16 +86,16 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the private or protected methods of a reflected class
+     * Gets the private or protected methods of a reflected class.
      *
-     * @param string $method [Name of the private or protected method that you
-     * want to get and execute]
-     * @param array|null $args [Optional parameter that allows you to specify the
-     * arguments that will be passed to the method when it is invoked]
-     *
-     * @return mixed
+     * @param string     $method [Name of the private or protected method that you
+     *                           want to get and execute]
+     * @param array|null $args   [Optional parameter that allows you to specify the
+     *                           arguments that will be passed to the method when it is invoked]
      *
      * @throws ReflectionException
+     *
+     * @return mixed
      */
     final public function getPrivateMethod(string $method, ?array $args = null): mixed
     {
@@ -113,14 +111,14 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the value of a private or protected property of a reflected class
+     * Gets the value of a private or protected property of a reflected class.
      *
      * @param string $property [Name of the private or protected property
-     * whose value you want to obtain]
-     *
-     * @return mixed
+     *                         whose value you want to obtain]
      *
      * @throws ReflectionException
+     *
+     * @return mixed
      */
     final public function getPrivateProperty(string $property): mixed
     {
@@ -132,15 +130,15 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Sets the value of a private or protected property of a reflected class
+     * Sets the value of a private or protected property of a reflected class.
      *
      * @param string $property [Name of the private or protected property whose
-     * value you want to set]
-     * @param mixed $value [Value to assign to the specified property]
-     *
-     * @return void
+     *                         value you want to set]
+     * @param mixed  $value    [Value to assign to the specified property]
      *
      * @throws ReflectionException
+     *
+     * @return void
      */
     final public function setPrivateProperty(string $property, mixed $value): void
     {
@@ -152,7 +150,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Delete a directory and all its contents recursively
+     * Delete a directory and all its contents recursively.
      *
      * @param string $dir [Directory to be deleted recursively]
      *
@@ -164,8 +162,8 @@ abstract class Test extends TestCase
             $objects = scandir($dir);
 
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    $path = $dir . '/' . $object;
+                if ($object != '.' && $object != '..') {
+                    $path = $dir.'/'.$object;
 
                     if (is_dir($path)) {
                         $this->rmdirRecursively($path);
@@ -180,10 +178,10 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Create folders from a defined path
+     * Create folders from a defined path.
      *
      * @param string $directory [Indicates the path of the directory you want
-     * to create]
+     *                          to create]
      *
      * @return void
      */
@@ -198,11 +196,11 @@ abstract class Test extends TestCase
 
     /**
      * Allows generating a blank image with specified dimensions and saving it
-     * to a specific path with a given file name
+     * to a specific path with a given file name.
      *
-     * @param int $x [Represents the width of the image to be created]
-     * @param int $y [Represents the height of the image to be created]
-     * @param string $path [Directory path where the image is saved]
+     * @param int    $x        [Represents the width of the image to be created]
+     * @param int    $y        [Represents the height of the image to be created]
+     * @param string $path     [Directory path where the image is saved]
      * @param string $fileName [Name of the image file to be created]
      *
      * @return void
@@ -221,12 +219,12 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Assertion to test if a JSON object is identical to the defined array
+     * Assertion to test if a JSON object is identical to the defined array.
      *
-     * @param string $json [JSON string to parse and compare with the provided
-     * data structure]
-     * @param array $options [Expected data structure expected to be present
-     * in the JSON]
+     * @param string $json    [JSON string to parse and compare with the provided
+     *                        data structure]
+     * @param array  $options [Expected data structure expected to be present
+     *                        in the JSON]
      *
      * @return void
      */
@@ -236,15 +234,15 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Makes an assertion about the value of a specific property of a class
+     * Makes an assertion about the value of a specific property of a class.
      *
      * @param string $property [Name of the property on which the assertion
-     * will be made]
-     * @param mixed $value [Expected value of the property]
-     *
-     * @return void
+     *                         will be made]
+     * @param mixed  $value    [Expected value of the property]
      *
      * @throws ReflectionException
+     *
+     * @return void
      */
     final public function assertPropertyValue(string $property, mixed $value): void
     {
@@ -253,11 +251,11 @@ abstract class Test extends TestCase
 
     /**
      * Method to perform an assertion of an object to test if it is an
-     * instance of that class
+     * instance of that class.
      *
-     * @param object $instance [Object whose type you want to verify]
-     * @param array $instances [Array containing the names of the classes
-     * with which you want to compare the object]
+     * @param object $instance  [Object whose type you want to verify]
+     * @param array  $instances [Array containing the names of the classes
+     *                          with which you want to compare the object]
      *
      * @return void
      */
@@ -270,11 +268,11 @@ abstract class Test extends TestCase
 
     /**
      * Perform assertions implementing the use of outputs in the buffer with
-     * ob_start
+     * ob_start.
      *
-     * @param string $output [Expected Output Message]
+     * @param string  $output   [Expected Output Message]
      * @param Closure $callback [Anonymous function to be executed within the
-     * context of output buffering]
+     *                          context of output buffering]
      *
      * @return string|false
      */
@@ -292,9 +290,9 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets a response string from the separation of a defined word
+     * Gets a response string from the separation of a defined word.
      *
-     * @param string $message [Defined message]
+     * @param string $message      [Defined message]
      * @param string $messageSplit [Separation text]
      *
      * @return string
@@ -307,13 +305,13 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Gets the exception object when consuming an API
+     * Gets the exception object when consuming an API.
      *
      * @param Closure $callback [Function that executes the exception]
      *
-     * @return GlobalException|null
-     *
      * @throws GlobalException [If you get an exception]
+     *
+     * @return GlobalException|null
      */
     final public function getExceptionFromApi(Closure $callback): ?GlobalException
     {
@@ -327,13 +325,13 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Run a process to validate if an exception is thrown
+     * Run a process to validate if an exception is thrown.
      *
      * @param Closure|null $callback [Function that is executed]
      *
-     * @return void
-     *
      * @throws Exception [If the process fails]
+     *
+     * @return void
      */
     final public function expectLionException(?Closure $callback = null): void
     {
@@ -364,7 +362,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Initialize an exception
+     * Initialize an exception.
      *
      * @param string $exception [Exception class]
      *
@@ -378,7 +376,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Initialize the exception message
+     * Initialize the exception message.
      *
      * @param string $exceptionMessage [Exception message]
      *
@@ -392,7 +390,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Initialize the response state of the exception
+     * Initialize the response state of the exception.
      *
      * @param string $exceptionStatus [Exception response status]
      *
@@ -406,7 +404,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Initialize the exception code
+     * Initialize the exception code.
      *
      * @param int $exceptionCode [Exception code]
      *
@@ -422,7 +420,7 @@ abstract class Test extends TestCase
     /**
      * Assert that a value is a date in the specified format.
      *
-     * @param string $value [The value to check]
+     * @param string $value  [The value to check]
      * @param string $format [The date format to validate against (default is 'Y-m-d')]
      */
     public function assertIsDate(string $value, string $format = 'Y-m-d'): void
@@ -435,7 +433,7 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Remove the $_SERVER header and assert if it does not exist
+     * Remove the $_SERVER header and assert if it does not exist.
      *
      * @param string $header [Header]
      *
@@ -450,7 +448,7 @@ abstract class Test extends TestCase
 
     /**
      * Removes the values of $_POST, $_GET, $_FILES, $_SERVER and asserts that
-     * they do not exist
+     * they do not exist.
      *
      * @param string $key
      *

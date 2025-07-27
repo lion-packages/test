@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use DateTime;
 use Exception as GlobalException;
 use JsonSerializable;
 use Lion\Exceptions\Exception;
 use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
-use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Tests\Provider\TestProviderTrait;
@@ -26,7 +23,7 @@ class TestTest extends Test
     private const int Y = 150;
     private const string PROPIERTY = 'bits';
     private const string STORAGE = './storage/';
-    private const string URL_PATH = self::STORAGE . 'example/';
+    private const string URL_PATH = self::STORAGE.'example/';
     private const string FILE_NAME = 'image.png';
     private const string FILE_NAME_CUSTOM = 'custom.png';
     private const array JSON = ['name' => 'lion'];
@@ -42,8 +39,7 @@ class TestTest extends Test
     {
         $this->createDirectory(self::URL_PATH);
 
-        $this->customClass = new class
-        {
+        $this->customClass = new class() {
             private int $bits = 100;
 
             public function setBits(int $bits): void
@@ -164,14 +160,14 @@ class TestTest extends Test
     {
         $this->createImage();
 
-        $this->assertFileExists(self::STORAGE . self::FILE_NAME);
+        $this->assertFileExists(self::STORAGE.self::FILE_NAME);
     }
 
     public function testCreateImageCustomValues(): void
     {
         $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
 
-        $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
+        $this->assertFileExists(self::URL_PATH.self::FILE_NAME_CUSTOM);
     }
 
     public function testAssertJsonContent(): void
@@ -200,7 +196,7 @@ class TestTest extends Test
     public function testAssertWithOb(): void
     {
         $this->assertWithOb(self::MESSAGE, function (): void {
-            echo (self::MESSAGE);
+            echo self::MESSAGE;
         });
     }
 
@@ -230,8 +226,7 @@ class TestTest extends Test
      */
     public function testExpectLionExceptionIsString(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class() extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -248,8 +243,7 @@ class TestTest extends Test
      */
     public function testExpectLionExceptionIsCallback(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class() extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
@@ -269,14 +263,13 @@ class TestTest extends Test
 
     public function testException(): void
     {
-        $customException = new class extends Exception implements JsonSerializable
-        {
+        $customException = new class() extends Exception implements JsonSerializable {
             use ExceptionTrait;
         };
 
         $this->assertInstances($this->exception($customException::class), [
             Test::class,
-            TestCase::class
+            TestCase::class,
         ]);
     }
 
@@ -284,7 +277,7 @@ class TestTest extends Test
     {
         $this->assertInstances($this->exceptionMessage(self::EXCEPTION_MESSAGE), [
             Test::class,
-            TestCase::class
+            TestCase::class,
         ]);
     }
 
@@ -292,7 +285,7 @@ class TestTest extends Test
     {
         $this->assertInstances($this->exceptionStatus(self::ERR_EXCEPTION_STATUS), [
             Test::class,
-            TestCase::class
+            TestCase::class,
         ]);
     }
 
@@ -300,7 +293,7 @@ class TestTest extends Test
     {
         $this->assertInstances($this->exceptionCode(self::ERR_EXCEPTION_CODE), [
             Test::class,
-            TestCase::class
+            TestCase::class,
         ]);
     }
 
