@@ -71,19 +71,6 @@ class TestTest extends Test
      * @throws ReflectionException
      */
     #[Testing]
-    public function initReflectionValueIsNotObjectTest(): void
-    {
-        $this->expectException(ReflectionException::class);
-        $this->expectExceptionCode(500);
-        $this->expectExceptionMessage('The provided instance is not an object');
-
-        $this->initReflection(1);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Testing]
     public function getPrivateMethodTest(): void
     {
         $this->initReflection($this->customClass);
@@ -197,7 +184,7 @@ class TestTest extends Test
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(500);
-        $this->expectExceptionMessage('Width and height must be greater than 0');
+        $this->expectExceptionMessage('Width and height must be greater than 0.');
 
         $this->createImage($x, $y);
     }

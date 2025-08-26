@@ -6,9 +6,12 @@ namespace Lion\Test;
 
 use Closure;
 use DateTime;
+use DateTimeImmutable;
 use Exception as GlobalException;
 use InvalidArgumentException;
+use JsonException;
 use Lion\Exceptions\Exception;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
@@ -17,294 +20,376 @@ use Throwable;
 
 /**
  * TestCase extended abstract test class, allows you to write unit tests in PHP
- * using the PHPUnit framework
- *
- * @package Lion\Test
+ * using the PHPUnit framework.
  */
 abstract class Test extends TestCase
 {
     /**
-     * [Object of ReflectionClass class]
+     * Holds a ReflectionClass instance for inspecting the target class at runtime.
+     *
+     * This object provides access to metadata of the reflected class, including:
+     * - Class name and namespace
+     * - Methods and their signatures
+     * - Properties and their visibility
+     * - Parent classes, interfaces, and traits
+     * - Doc comments and annotations
      *
      * @var ReflectionClass<object> $reflectionClass
      */
     private ReflectionClass $reflectionClass;
 
     /**
-     * [Object that will be reflected]
+     * Object that will be reflected
      *
      * @var mixed $instance
      */
     private mixed $instance;
 
     /**
-     * [Exception class]
+     * Exception class
      *
      * @var string $exception
      */
     private string $exception;
 
     /**
-     * [Exception message]
+     * Exception message
      *
      * @var string $exceptionMessage
      */
     private string $exceptionMessage;
 
     /**
-     * [Exception response status]
+     * Exception response status
      *
      * @var string $exceptionStatus
      */
     private string $exceptionStatus;
 
     /**
-     * [Exception code]
+     * Exception code
      *
      * @var int|string $exceptionCode
      */
     private int|string $exceptionCode;
 
     /**
-     * Initializes the object to perform a reflection on a class
+     * Initializes reflection for the provided object instance.
      *
-     * @param mixed $instance [Object of any type that is subjected to
-     * reflection]
+     * This method sets up the ReflectionClass instance, granting
+     * access to the target class metadata (methods, properties, traits, etc.).
+     *
+     * @param object $instance The object whose class will be reflected.
      *
      * @return void
      *
-     * @throws ReflectionException
+     * @throws ReflectionException If reflection cannot be initialized.
      *
      * @codeCoverageIgnore
+     * @phpstan-ignore-next-line
      */
-    final protected function initReflection(mixed $instance): void
+    final protected function initReflection(object $instance): void
     {
-        if (!is_object($instance)) {
-            throw new ReflectionException('The provided instance is not an object', 500);
-        }
-
         $this->instance = $instance;
-
-        $className = get_class($this->instance);
-
-        if (!class_exists($className)) {
-            throw new ReflectionException('The class does not exist', 500);
-        }
 
         $this->reflectionClass = new ReflectionClass($this->instance);
     }
 
     /**
-     * Gets the private or protected methods of a reflected class
+     * Invokes a private or protected method of the reflected class.
      *
-     * @param string $method [Name of the private or protected method that you
-     * want to get and execute]
-     * @param array<int|string, mixed> $args [Optional parameter that allows you
-     * to specify the arguments that will be passed to the method when it is
-     * invoked]
+     * Useful for testing or when controlled access to hidden methods is required.
      *
-     * @return mixed
+     * @param string $method Name of the private or protected method to invoke.
+     * @param array<int|string, mixed> $args Optional arguments to pass to the
+     * method.
      *
-     * @throws ReflectionException
+     * @return mixed The result of the invoked method.
+     *
+     * @throws ReflectionException If the method does not exist.
      *
      * @infection-ignore-all
      */
     final protected function getPrivateMethod(string $method, array $args = []): mixed
     {
-        /** @var object $instance */
-        $instance = $this->instance;
+        if (!$this->reflectionClass->hasMethod($method)) {
+            throw new ReflectionException(
+                "Method {$method} does not exist in class {$this->reflectionClass->getName()}.",
+                500
+            );
+        }
 
         return $this->reflectionClass
             ->getMethod($method)
-            ->invokeArgs($instance, $args);
+            ->invokeArgs($this->instance, $args);
     }
 
     /**
-     * Gets the value of a private or protected property of a reflected class
+     * Retrieves the value of a private or protected property from the reflected
+     * class instance.
      *
-     * @param string $property [Name of the private or protected property
-     * whose value you want to obtain]
+     * This method allows controlled access to non-public properties, primarily
+     * for testing or advanced use cases where encapsulation must be bypassed.
      *
-     * @return mixed
+     * @param string $property Name of the private or protected property.
      *
-     * @throws ReflectionException
+     * @return mixed The current value of the property.
+     *
+     * @throws ReflectionException If the property does not exist in the reflected
+     * class.
      *
      * @infection-ignore-all
      */
     final protected function getPrivateProperty(string $property): mixed
     {
-        /** @var object $instance */
-        $instance = $this->instance;
+        if (!$this->reflectionClass->hasProperty($property)) {
+            throw new ReflectionException(
+                "Property '{$property}' does not exist in class {$this->reflectionClass->getName()}.",
+                500
+            );
+        }
 
         return $this->reflectionClass
             ->getProperty($property)
-            ->getValue($instance);
+            ->getValue($this->instance);
     }
 
     /**
-     * Sets the value of a private or protected property of a reflected class
+     * Sets the value of a private or protected property on the reflected class
+     * instance.
      *
-     * @param string $property [Name of the private or protected property whose
-     * value you want to set]
-     * @param mixed $value [Value to assign to the specified property]
+     * This method allows controlled modification of non-public properties, primarily
+     * for testing or advanced use cases where encapsulation must be bypassed.
+     *
+     * @param string $property Name of the private or protected property to modify.
+     * @param mixed $value The value to assign to the specified property.
      *
      * @return void
      *
-     * @throws ReflectionException
+     * @throws ReflectionException If the property does not exist in the reflected class.
      *
      * @infection-ignore-all
      */
     final protected function setPrivateProperty(string $property, mixed $value): void
     {
-        /** @var object $instance */
-        $instance = $this->instance;
+        if (!$this->reflectionClass->hasProperty($property)) {
+            throw new ReflectionException(
+                "Property '{$property}' does not exist in class {$this->reflectionClass->getName()}.",
+                500
+            );
+        }
 
         $this->reflectionClass
             ->getProperty($property)
-            ->setValue($instance, $value);
+            ->setValue($this->instance, $value);
     }
 
     /**
-     * Delete a directory and all its contents recursively
+     * Deletes a directory and all its contents recursively.
      *
-     * @param string $dir [Directory to be deleted recursively]
+     * This method will traverse through all files and subdirectories of the given
+     * path and remove them before finally removing the root directory itself.
+     *
+     * Use with caution: This operation is destructive and irreversible.
+     *
+     * @param string $dir Absolute or relative path to the directory to be deleted.
      *
      * @return void
+     *
+     * @throws RuntimeException If a file or directory cannot be deleted.
      *
      * @infection-ignore-all
      */
     final protected function rmdirRecursively(string $dir): void
     {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
+        if (!is_dir($dir)) {
+            return;
+        }
 
-            if (is_array($objects)) {
-                foreach ($objects as $object) {
-                    if ($object != '.' && $object != '..') {
-                        $path = $dir . '/' . $object;
+        $objects = scandir($dir);
 
-                        if (is_dir($path)) {
-                            $this->rmdirRecursively($path);
-                        } else {
-                            unlink($path);
-                        }
-                    }
-                }
+        if ($objects === false) {
+            throw new RuntimeException("Unable to read directory: {$dir}.", 500);
+        }
 
-                rmdir($dir);
+        foreach ($objects as $object) {
+            if ($object === '.' || $object === '..') {
+                continue;
             }
+
+            $path = $dir . DIRECTORY_SEPARATOR . $object;
+
+            if (is_dir($path)) {
+                $this->rmdirRecursively($path);
+            } elseif (is_file($path) || is_link($path)) {
+                if (!unlink($path)) {
+                    throw new RuntimeException("Failed to delete file: {$path}.", 500);
+                }
+            }
+        }
+
+        if (!rmdir($dir)) {
+            throw new RuntimeException("Failed to remove directory: {$dir}.", 500);
         }
     }
 
     /**
-     * Create folders from a defined path
+     * Creates a directory (and any necessary parent directories) from a given path.
      *
-     * @param string $directory [Indicates the path of the directory you want
-     * to create]
+     * If the directory already exists, the method does nothing. If the directory
+     * cannot be created, it throws a RuntimeException.
+     *
+     * @param string $directory Absolute or relative path of the directory to
+     * create.
      *
      * @return void
+     *
+     * @throws RuntimeException If the directory cannot be created.
      *
      * @codeCoverageIgnore
      */
     final protected function createDirectory(string $directory): void
     {
-        if (!is_dir($directory)) {
-            if (!mkdir($directory, 0777, true)) {
-                throw new RuntimeException("Could not create directory: {$directory}", 500);
-            }
+        if (is_dir($directory)) {
+            return;
+        }
+
+        if (!mkdir($directory, 0777, true) && !is_dir($directory)) {
+            throw new RuntimeException("Failed to create directory: {$directory}.", 500);
         }
     }
 
     /**
-     * Allows generating a blank image with specified dimensions and saving it
-     * to a specific path with a given file name
+     * Generates a blank PNG image with specified dimensions and saves it to a given
+     * directory with a specified file name.
      *
-     * @param int $x [Represents the width of the image to be created]
-     * @param int $y [Represents the height of the image to be created]
-     * @param string $path [Directory path where the image is saved]
-     * @param string $fileName [Name of the image file to be created]
+     * The generated image will have a white background by default.
+     *
+     * @param int $width  Width of the image in pixels (must be greater than 0).
+     * @param int $height Height of the image in pixels (must be greater than 0).
+     * @param string $path Directory where the image should be saved (must be
+     * writable).
+     * @param string $fileName File name of the image (e.g., "image.png").
      *
      * @return void
+     *
+     * @throws InvalidArgumentException If width or height are invalid.
+     * @throws RuntimeException If the image creation or saving fails.
      *
      * @codeCoverageIgnore
      */
     final protected function createImage(
-        int $x = 100,
-        int $y = 100,
+        int $width = 100,
+        int $height = 100,
         string $path = './storage/',
         string $fileName = 'image.png'
     ): void {
-        if ($x <= 0 || $y <= 0) {
-            throw new InvalidArgumentException('Width and height must be greater than 0', 500);
+        if ($width <= 0 || $height <= 0) {
+            throw new InvalidArgumentException('Width and height must be greater than 0.', 500);
         }
 
-        $image = imagecreatetruecolor($x, $y);
-
-        $color = imagecolorallocate($image, 255, 255, 255);
-
-        if (!$color) {
-            throw new RuntimeException('Failed to allocate color', 500);
+        if (!is_dir($path) && !mkdir($path, 0777, true) && !is_dir($path)) {
+            throw new RuntimeException("Failed to create directory: {$path}.", 500);
         }
 
-        imagefill($image, 0, 0, $color);
+        if (!is_writable($path)) {
+            throw new RuntimeException("The directory is not writable: {$path}.", 500);
+        }
 
-        imagepng($image, "{$path}{$fileName}");
+        $image = imagecreatetruecolor($width, $height);
+
+        if ($image === false) {
+            throw new RuntimeException('Failed to create image resource.', 500);
+        }
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+
+        if ($white === false) {
+            imagedestroy($image);
+
+            throw new RuntimeException('Failed to allocate color.', 500);
+        }
+
+        imagefill($image, 0, 0, $white);
+
+        $filePath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+
+        if (!imagepng($image, $filePath)) {
+            imagedestroy($image);
+
+            throw new RuntimeException("Failed to save image at: {$filePath}.", 500);
+        }
+
+        imagedestroy($image);
     }
 
     /**
-     * Assertion to test if a JSON object is identical to the defined array
+     * Asserts that a JSON string is structurally and value-wise identical
+     * to the given expected array.
      *
-     * @param string $json [JSON string to parse and compare with the provided
-     * data structure]
-     * @param array<string, mixed> $options [Expected data structure expected to be present
-     * in the JSON]
+     * The expected array is encoded to JSON (with pretty print and strict error
+     * handling), and then compared against the provided JSON string to ensure
+     * both represent exactly the same structure and values.
+     *
+     * @param string $json JSON string to compare against the expected data.
+     * @param array<string, mixed> $expected Expected data structure to validate against.
      *
      * @return void
      *
+     * @throws JsonException If encoding the expected array to JSON fails.
+     *
      * @infection-ignore-all
      */
-    final protected function assertJsonContent(string $json, array $options): void
+    final protected function assertJsonContent(string $json, array $expected): void
     {
-        $jsonEncode = json_encode($options, JSON_PRETTY_PRINT);
+        $expectedJson = json_encode(
+            value: $expected,
+            flags: JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
 
-        if (!is_string($jsonEncode)) {
-            throw new RuntimeException('Failed to convert JSON to string', 500);
-        }
-
-        $this->assertJsonStringEqualsJsonString($json, $jsonEncode);
+        $this->assertJsonStringEqualsJsonString($expectedJson, $json);
     }
 
     /**
-     * Makes an assertion about the value of a specific property of a class
+     * Asserts that the value of a given private or protected property
+     * strictly matches the expected value.
      *
-     * @param string $property [Name of the property on which the assertion
-     * will be made]
-     * @param mixed $value [Expected value of the property]
+     * Retrieves the property value from the reflected class instance
+     * and compares it to the provided expected value.
+     *
+     * @param string $property Name of the property to check.
+     * @param mixed  $expected Expected value of the property.
      *
      * @return void
      *
-     * @throws ReflectionException
+     * @throws ReflectionException If the property does not exist or cannot be accessed.
      *
      * @infection-ignore-all
      */
-    final protected function assertPropertyValue(string $property, mixed $value): void
+    final protected function assertPropertyValue(string $property, mixed $expected): void
     {
-        $this->assertSame($value, $this->getPrivateProperty($property));
+        $this->assertSame($expected, $this->getPrivateProperty($property));
     }
 
     /**
-     * Method to perform an assertion of an object to test if it is an
-     * instance of that class
+     * Asserts that the given object is an instance of all specified classes.
      *
-     * @param mixed $instance [Object whose type you want to verify]
-     * @param array<int, class-string> $instances [Array containing the names of
-     * the classes with which you want to compare the object]
+     * This is useful for testing objects that implement multiple interfaces or
+     * extend certain base classes. The method will iterate over the list of
+     * class/interface names and assert that the object matches each one.
+     *
+     * @param object $instance The object whose type you want to verify.
+     * @param array<int, class-string> $instances Array of fully-qualified
+     * class/interface names against which the object will be tested.
      *
      * @return void
      *
+     * @throws AssertionFailedError If the object is not an instance of one or more
+     * classes.
+     *
      * @infection-ignore-all
      */
-    final protected function assertInstances(mixed $instance, array $instances): void
+    final protected function assertInstances(object $instance, array $instances): void
     {
         foreach ($instances as $class) {
             $this->assertInstanceOf($class, $instance);
@@ -312,57 +397,77 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Perform assertions implementing the use of outputs in the buffer with
-     * ob_start
+     * Asserts that the output generated by executing a callback within an output
+     * buffer matches the expected output string.
      *
-     * @param string $output [Expected Output Message]
-     * @param Closure $callback [Anonymous function to be executed within the
-     * context of output buffering]
+     * This method uses output buffering (`ob_start`) to capture any direct output
+     * (e.g., echo, print) from the callback, compares it against the expected
+     * output, and returns the captured value.
      *
-     * @return string
+     * @param string  $expected Expected output content.
+     * @param Closure $callback Callback to execute, whose output will be captured.
+     *
+     * @return string The actual captured output.
+     *
+     * @throws RuntimeException If output buffering fails unexpectedly.
      *
      * @infection-ignore-all
      */
-    final protected function assertWithOb(string $output, Closure $callback): string
+    final protected function assertWithOb(string $expected, Closure $callback): string
     {
-        ob_start();
+        if (!ob_start()) {
+            throw new RuntimeException('Failed to start output buffering.', 500);
+        }
 
         $callback();
 
-        $outputGetClean = ob_get_clean();
+        $actual = ob_get_clean();
 
-        $this->assertSame($output, $outputGetClean);
+        if (!$actual) {
+            throw new RuntimeException('Failed to retrieve output buffer.', 500);
+        }
 
-        return $outputGetClean;
+        $this->assertSame($expected, $actual);
+
+        return $actual;
     }
 
     /**
-     * Gets a response string from the separation of a defined word
+     * Extracts and returns the substring that appears after the last occurrence of
+     * a given separator within a message string.
      *
-     * @param string $message [Defined message]
-     * @param string $messageSplit [Separation text]
+     * @param string $message The original message to process.
+     * @param string $separator The delimiter used to split the message.
      *
-     * @return string
+     * @return string The trimmed substring after the last separator.
+     *
+     * @throws InvalidArgumentException If the separator is an empty string.
      *
      * @infection-ignore-all
      */
-    final protected function getResponse(string $message, string $messageSplit): string
+    final protected function getResponse(string $message, string $separator): string
     {
-        if ('' === $messageSplit) {
-            throw new InvalidArgumentException('Separator cannot be an empty string', 500);
+        if ('' === $separator) {
+            throw new InvalidArgumentException('Separator cannot be an empty string.', 500);
         }
 
-        $split = explode($messageSplit, $message);
+        $parts = explode($separator, $message);
 
-        return trim(end($split));
+        return trim((string) end($parts));
     }
 
     /**
-     * Gets the exception object when consuming an API
+     * Executes a callback and captures a GlobalException if thrown.
      *
-     * @param Closure $callback [Function that executes the exception]
+     * This helper is useful when testing or handling API calls that may throw a
+     * GlobalException, allowing you to inspect the exception object directly
+     * instead of letting it bubble up.
      *
-     * @return GlobalException|null
+     * @param Closure $callback Callback expected to potentially throw a
+     * GlobalException.
+     *
+     * @return GlobalException|null Returns the exception object if caught, or null
+     * if none was thrown.
      *
      * @infection-ignore-all
      */
@@ -372,25 +477,42 @@ abstract class Test extends TestCase
             $callback();
 
             return null;
-        } catch (GlobalException $e) {
-            return $e;
+        } catch (GlobalException $exception) {
+            return $exception;
         }
     }
 
     /**
-     * Run a process to validate if an exception is thrown
+     * Executes a process to validate that a predefined exception is thrown.
      *
-     * @param Closure|null $callback [Function that is executed]
+     * This helper method is designed to assert that a specific exception type,
+     * message, status, and code are raised during testing. It supports two modes:
+     *
+     * 1. **Automatic mode (no callback provided):**
+     *    It will instantiate and throw the configured exception based on the
+     *    current test context, asserting that its properties match the expected
+     *    values.
+     *
+     * 2. **Callback mode (callback provided):**
+     *    Executes the given callback, and if an exception is thrown, validates
+     *    that the exception matches the configured expectations.
+     *
+     * @param Closure|null $callback Optional callback to execute, expected to throw
+     * the configured exception.
      *
      * @return void
      *
-     * @throws Exception [If the process fails]
-     *
-     * @codeCoverageIgnore
+     * @throws InvalidArgumentException If the configured exception class does not
+     * extend Throwable.
+     * @throws Exception If validation or instantiation of the exception fails.
      */
     final protected function expectLionException(?Closure $callback = null): void
     {
         if (null === $callback) {
+            if (!is_subclass_of($this->exception, Throwable::class)) {
+                throw new InvalidArgumentException('The exception must be a subclass of Throwable.', 500);
+            }
+
             /** @var Exception $lionException */
             $lionException = new $this->exception(
                 $this->exceptionMessage,
@@ -398,28 +520,23 @@ abstract class Test extends TestCase
                 $this->exceptionCode
             );
 
-            if (!is_subclass_of($this->exception, Throwable::class)) {
-                throw new InvalidArgumentException('The exception must be a subclass of Throwable', 500);
-            }
-
             $this->expectException($this->exception);
             $this->expectExceptionMessage($this->exceptionMessage);
-            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
             $this->expectExceptionCode($this->exceptionCode);
+            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
 
             throw $lionException;
-        } else {
-            try {
-                $callback();
-            } catch (Exception $e) {
-                $this->assertSame($this->exception, $e::class);
-                $this->assertSame($this->exceptionStatus, $e->getStatus());
-                $this->assertSame($this->exceptionMessage, $e->getMessage());
-                $this->assertSame($this->exceptionCode, $e->getCode());
-            }
+        }
+
+        try {
+            $callback();
+        } catch (Exception $e) {
+            $this->assertSame($this->exception, $e::class);
+            $this->assertSame($this->exceptionStatus, $e->getStatus());
+            $this->assertSame($this->exceptionMessage, $e->getMessage());
+            $this->assertSame($this->exceptionCode, $e->getCode());
         }
     }
-
 
     /**
      * Initialize an exception
@@ -440,7 +557,7 @@ abstract class Test extends TestCase
     /**
      * Initialize the exception message
      *
-     * @param string $exceptionMessage [Exception message]
+     * @param string $exceptionMessage Exception message
      *
      * @return Test
      *
@@ -456,7 +573,7 @@ abstract class Test extends TestCase
     /**
      * Initialize the response state of the exception
      *
-     * @param string $exceptionStatus [Exception response status]
+     * @param string $exceptionStatus Exception response status
      *
      * @return Test
      *
@@ -472,7 +589,7 @@ abstract class Test extends TestCase
     /**
      * Initialize the exception code
      *
-     * @param int|string $exceptionCode [Exception code]
+     * @param int|string $exceptionCode Exception code
      *
      * @return Test
      *
@@ -486,11 +603,13 @@ abstract class Test extends TestCase
     }
 
     /**
-     * Assert that a value is a date in the specified format.
+     * Assert that a given string is a valid date in the specified format.
      *
-     * @param string $value [The value to check]
-     * @param string $format [The date format to validate against (default is
-     * 'Y-m-d')]
+     * This assertion checks that the string can be parsed into a valid date
+     * and that its formatted output matches exactly the expected format.
+     *
+     * @param string $value The string value to validate as a date.
+     * @param string $format The expected date format (default: 'Y-m-d').
      *
      * @return void
      *
@@ -498,41 +617,67 @@ abstract class Test extends TestCase
      */
     protected function assertIsDate(string $value, string $format = 'Y-m-d'): void
     {
-        $date = DateTime::createFromFormat($format, $value);
+        $date = DateTimeImmutable::createFromFormat($format, $value);
 
-        $isValidDate = $date && $date->format($format) === $value;
+        $errors = DateTimeImmutable::getLastErrors();
 
-        $this->assertTrue($isValidDate, "Failed asserting that '{$value}' is a valid date in format '{$format}'.");
+        $isValidDate = false !== $date
+            && empty($errors['warning_count'])
+            && empty($errors['error_count'])
+            && $date->format($format) === $value;
+
+        $this->assertTrue($isValidDate);
     }
 
     /**
-     * Remove the $_SERVER header and assert if it does not exist
+     * Removes a specific header from the $_SERVER superglobal and asserts
+     * that it no longer exists in the array.
      *
-     * @param string $header [Header name]
+     * This method is useful in test scenarios where it is necessary to
+     * ensure that a given HTTP header has been cleared and is not present
+     * in the request context.
+     *
+     * @param string $header The name of the header key to remove from $_SERVER.
      *
      * @return void
+     *
+     * @throws InvalidArgumentException If the provided header name is empty.
      *
      * @infection-ignore-all
      */
     final protected function assertHeaderNotHasKey(string $header): void
     {
+        if ('' === $header) {
+            throw new InvalidArgumentException('Header name cannot be empty.', 500);
+        }
+
         unset($_SERVER[$header]);
 
         $this->assertArrayNotHasKey($header, $_SERVER);
     }
 
     /**
-     * Removes the values of $_POST, $_GET, $_FILES, $_SERVER and asserts that
-     * they do not exist
+     * Removes a specific key from the PHP superglobals ($_POST, $_GET, $_FILES, $_SERVER, $_COOKIE)
+     * and asserts that the key no longer exists in any of them.
      *
-     * @param string $key
+     * This method is useful in test scenarios where it is necessary to ensure
+     * that no residual request data (query parameters, form fields, file uploads,
+     * cookies, or server headers) is present for the given key.
+     *
+     * @param string $key The key to remove and validate its absence across superglobals.
      *
      * @return void
+     *
+     * @throws InvalidArgumentException If the provided key is an empty string.
      *
      * @infection-ignore-all
      */
     final protected function assertHttpBodyNotHasKey(string $key): void
     {
+        if ($key === '') {
+            throw new InvalidArgumentException('Superglobal key cannot be empty.', 500);
+        }
+
         if (isset($_SERVER[$key])) {
             $this->assertHeaderNotHasKey($key);
         }
@@ -553,6 +698,12 @@ abstract class Test extends TestCase
             unset($_FILES[$key]);
 
             $this->assertArrayNotHasKey($key, $_FILES);
+        }
+
+        if (isset($_COOKIE[$key])) {
+            unset($_COOKIE[$key]);
+
+            $this->assertArrayNotHasKey($key, $_COOKIE);
         }
     }
 }
