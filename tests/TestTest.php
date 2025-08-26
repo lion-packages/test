@@ -6,15 +6,16 @@ namespace Tests;
 
 use Exception as GlobalException;
 use InvalidArgumentException;
-use JsonSerializable;
+use JsonException;
 use Lion\Exceptions\Exception;
-use Lion\Exceptions\Traits\ExceptionTrait;
 use Lion\Test\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\Test as Testing;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
+use RuntimeException;
 use Tests\Provider\ClassProvider;
 use Tests\Provider\ExceptionProviderClass;
 use Tests\Provider\TestProviderTrait;
@@ -27,28 +28,33 @@ class TestTest extends Test
     private const int X = 200;
     private const int Y = 150;
     private const string PROPERTY = 'bits';
-    private const string STORAGE = './storage/';
-    private const string URL_PATH = self::STORAGE . 'example/';
     private const string FILE_NAME = 'image.png';
     private const string FILE_NAME_CUSTOM = 'custom.png';
-    private const array JSON = ['name' => 'lion'];
+    private const array JSON = [
+        'name' => 'lion',
+    ];
     private const string MESSAGE = 'Testing';
     private const string EXCP_MESSAGE = 'ERR';
     private const string EXCP_STATUS = 'session-error';
     private const int EXCP_CODE = 500;
 
     private ClassProvider $customClass;
+    private string $tempDir;
 
     protected function setUp(): void
     {
-        $this->createDirectory(self::URL_PATH);
-
         $this->customClass = new ClassProvider();
+
+        $this->tempDir = sys_get_temp_dir() . '/lion_test_' . uniqid() . '/storage/';
+
+        mkdir($this->tempDir, 0777, true);
     }
 
     protected function tearDown(): void
     {
-        $this->rmdirRecursively(self::STORAGE);
+        if (isset($this->tempDir) && is_dir($this->tempDir)) {
+            $this->rmdirRecursively($this->tempDir);
+        }
     }
 
     /**
@@ -65,6 +71,21 @@ class TestTest extends Test
         $this->initReflection($classObject);
         $this->setPrivateProperty('number', 1);
         $this->assertSame(1, $this->getPrivateProperty('number'));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function getPrivateMethodItDoesNotExistTest(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Method errMethod does not exist in class Tests\Provider\ClassProvider.');
+
+        $this->initReflection($this->customClass);
+
+        $this->getPrivateMethod('errMethod');
     }
 
     /**
@@ -119,6 +140,21 @@ class TestTest extends Test
      * @throws ReflectionException
      */
     #[Testing]
+    public function getPrivatePropertyItDoesNotExistTest(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage("Property 'errProperty' does not exist in class Tests\Provider\ClassProvider.");
+
+        $this->initReflection($this->customClass);
+
+        $this->getPrivateProperty('errProperty');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
     public function getPrivatePropertyTest(): void
     {
         $this->initReflection($this->customClass);
@@ -126,6 +162,21 @@ class TestTest extends Test
         $this->customClass->setBits(self::BITS);
 
         $this->assertSame(self::BITS, $this->getPrivateProperty(self::PROPERTY));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Testing]
+    public function setPrivatePropertyItDoesNotExistTest(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage("Property 'errProperty' does not exist in class Tests\Provider\ClassProvider.");
+
+        $this->initReflection($this->customClass);
+
+        $this->setPrivateProperty('errProperty', null);
     }
 
     /**
@@ -142,37 +193,276 @@ class TestTest extends Test
     }
 
     #[Testing]
+    #[TestWith(['dir' => 'directory-1/'])]
+    #[TestWith(['dir' => 'directory-2/'])]
+    #[TestWith(['dir' => 'directory-3/'])]
+    #[TestWith(['dir' => 'directory-4/'])]
+    public function rmdirRecursivelyInvalidDirTest(string $dir): void
+    {
+        $dir = $this->tempDir . $dir;
+
+        $this->assertFalse(is_dir($dir));
+
+        $this->rmdirRecursively($dir);
+
+        $this->assertFalse(is_dir($dir));
+    }
+
+    #[Testing]
+    #[TestWith(['dir' => 'directory-1/'], 'case-0')]
+    #[TestWith(['dir' => 'directory-2/'], 'case-1')]
+    #[TestWith(['dir' => 'directory-3/'], 'case-2')]
+    #[TestWith(['dir' => 'directory-4/'], 'case-3')]
+    public function rmdirRecusivelyInvalidObjectsTest(string $dir): void
+    {
+        $dir = $this->tempDir . $dir;
+
+        mkdir($dir);
+
+        chmod($dir, 0000);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage("Unable to read directory: {$dir}.");
+
+        try {
+            @$this->rmdirRecursively($dir);
+        } finally {
+            chmod($dir, 0777);
+
+            rmdir($dir);
+        }
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    #[TestWith(['dir' => 'directory-1/'], 'case-0')]
+    #[TestWith(['dir' => 'directory-2/'], 'case-1')]
+    #[TestWith(['dir' => 'directory-3/'], 'case-2')]
+    #[TestWith(['dir' => 'directory-4/'], 'case-3')]
+    public function rmdirRecursivelyUnlinkFailureTest(string $dir): void
+    {
+        $dir = $this->tempDir . $dir;
+
+        mkdir($dir);
+
+        $file = $dir . '/file.txt';
+
+        file_put_contents($file, 'test');
+
+        chmod($dir, 0555);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage("Failed to delete file: {$file}.");
+
+        try {
+            @$this->rmdirRecursively($dir);
+        } finally {
+            chmod($dir, 0755);
+
+            if (is_file($file)) {
+                unlink($file);
+            }
+
+            if (is_dir($dir)) {
+                rmdir($dir);
+            }
+        }
+    }
+
+    #[Testing]
+    public function rmdirRecursivelyWithSubdirectoriesTest(): void
+    {
+        $dir = $this->tempDir . '/parent';
+
+        $subDir = $dir . '/child';
+
+        mkdir($subDir, 0777, true);
+
+        $file = $subDir . '/file.txt';
+
+        file_put_contents($file, 'test');
+
+        $this->rmdirRecursively($dir);
+
+        $this->assertFalse(is_dir($dir));
+        $this->assertFalse(is_dir($subDir));
+        $this->assertFalse(is_file($file));
+    }
+
+    #[Testing]
     public function rmdirRecursivelyTest(): void
     {
-        $this->createDirectory(self::URL_PATH);
+        $this->rmdirRecursively($this->tempDir);
 
-        $this->rmdirRecursively(self::URL_PATH);
-
-        $this->assertFalse(is_dir(self::URL_PATH));
+        $this->assertFalse(is_dir($this->tempDir));
     }
 
     #[Testing]
     public function createDirectoryTest(): void
     {
-        $this->createDirectory(self::URL_PATH);
+        $this->createDirectory($this->tempDir);
 
-        $this->assertTrue(is_dir(self::URL_PATH));
+        $this->assertTrue(is_dir($this->tempDir));
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function testCreateDirectoryFailure(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function mkdir(string $directory, int $permissions = 0777, bool $recursive = false): bool
+                {
+                    return false;
+                }
+            }
+        ');
+
+        $dir = "/root/fake_dir_fail_" . uniqid();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Failed to create directory: {$dir}.");
+        $this->expectExceptionCode(500);
+
+        @$this->createDirectory($dir);
     }
 
     #[Testing]
     public function createImageDefaultValues(): void
     {
-        $this->createImage();
+        $this->createImage(
+            path: $this->tempDir
+        );
 
-        $this->assertFileExists(self::STORAGE . self::FILE_NAME);
+        $this->assertFileExists($this->tempDir . self::FILE_NAME);
     }
 
     #[Testing]
     public function createImageCustomValues(): void
     {
-        $this->createImage(self::X, self::Y, self::URL_PATH, self::FILE_NAME_CUSTOM);
+        $this->createImage(
+            width: self::X,
+            height: self::Y,
+            path: $this->tempDir,
+            fileName: self::FILE_NAME_CUSTOM
+        );
 
-        $this->assertFileExists(self::URL_PATH . self::FILE_NAME_CUSTOM);
+        $this->assertFileExists($this->tempDir . self::FILE_NAME_CUSTOM);
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function createImageFailsToCreateDirectoryTest(): void
+    {
+        $path = '/root/fake_image_dir_' . uniqid();
+
+        $fileName = 'test.png';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Failed to create directory: {$path}.");
+        $this->expectExceptionCode(500);
+
+        @$this->createImage(100, 100, $path, $fileName);
+
+        restore_error_handler();
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function createImageDirectoryNotWritableTest(): void
+    {
+        $path = sys_get_temp_dir() . '/fake_not_writable_' . uniqid();
+
+        mkdir($path);
+
+        chmod($path, 0555);
+
+        $fileName = 'test.png';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("The directory is not writable: {$path}.");
+        $this->expectExceptionCode(500);
+
+        try {
+            $this->createImage(100, 100, $path, $fileName);
+        } finally {
+            chmod($path, 0777);
+
+            rmdir($path);
+        }
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function createImageImageResourceFailureTest(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function imagecreatetruecolor(int $width, int $height): \GdImage|false
+                {
+                    return false;
+                }
+            }
+        ');
+
+        $path = sys_get_temp_dir() . '/fake_image_fail_' . uniqid();
+
+        mkdir($path);
+
+        $fileName = 'test.png';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to create image resource.');
+        $this->expectExceptionCode(500);
+
+        try {
+            $this->createImage(100, 100, $path, $fileName);
+        } finally {
+            rmdir($path);
+        }
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function createImageColorAllocateFailureTest(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function imagecolorallocate(\GdImage $image, int $red, int $green, int $blue): int|false
+                {
+                    return false;
+                }
+            }
+        ');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to allocate color.');
+        $this->expectExceptionCode(500);
+
+        $this->createImage(10, 10, $this->tempDir, 'fail.png');
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function createImageSaveFailureTest(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function imagepng($image, $file) {
+                    return false;
+                }
+            }
+        ');
+
+        $fileName = 'fail_save.png';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Failed to save image at: {$this->tempDir}{$fileName}.");
+        $this->expectExceptionCode(500);
+
+        $this->createImage(10, 10, $this->tempDir, $fileName);
     }
 
     #[Testing]
@@ -186,9 +476,12 @@ class TestTest extends Test
         $this->expectExceptionCode(500);
         $this->expectExceptionMessage('Width and height must be greater than 0.');
 
-        $this->createImage($x, $y);
+        $this->createImage(width: $x, height: $y);
     }
 
+    /**
+     * @throws JsonException
+     */
     #[Testing]
     public function assertJsonContentTest(): void
     {
@@ -216,16 +509,61 @@ class TestTest extends Test
     /**
      * Match instances of an object
      *
-     * @param mixed $instance [Instance object]
+     * @param object $instance [Instance object]
      * @param array<int, class-string> $instances [List of instance objects]
      *
      * @return void
      */
     #[Testing]
     #[DataProvider('assertInstancesProvider')]
-    public function assertInstancesTest(mixed $instance, array $instances): void
+    public function assertInstancesTest(object $instance, array $instances): void
     {
         $this->assertInstances($instance, $instances);
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function assertWithObStartFailureTest(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function ob_start(): bool {
+                    return false;
+                }
+            }
+        ');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Failed to start output buffering.');
+
+        $this->assertWithOb('expected', function (): void {
+            echo 'expected';
+        });
+    }
+
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function assertWithObGetCleanFailureTest(): void
+    {
+        eval('
+            namespace Lion\Test {
+                function ob_start(): bool {
+                    return true;
+                }
+                function ob_get_clean(): bool {
+                    return false;
+                }
+            }
+        ');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Failed to retrieve output buffer.');
+
+        $this->assertWithOb('.', function (): void {
+            echo '.';
+        });
     }
 
     #[Testing]
@@ -277,6 +615,25 @@ class TestTest extends Test
 
         $this->assertNull($exception);
     }
+
+    /**
+     * @throws Exception If validation or instantiation of the exception fails.
+     * @throws InvalidArgumentException If the configured exception class does not
+     *  extend Throwable.
+     */
+    #[Testing]
+    #[RunInSeparateProcess]
+    public function expectLionExceptionWithInvalidExceptionClassTest(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The exception must be a subclass of Throwable.');
+        $this->expectExceptionCode(500);
+
+        $this
+            ->exception('ClassItDoesNotExist')
+            ->expectLionException();
+    }
+
 
     /**
      * @throws Exception
@@ -362,6 +719,15 @@ class TestTest extends Test
     }
 
     #[Testing]
+    public function assertHeaderNotHasKeyEmptyKeyTest(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Header name cannot be empty.');
+        $this->assertHeaderNotHasKey('');
+    }
+
+    #[Testing]
     #[DataProvider('assertHeaderNotHasKeyProvider')]
     public function assertHeaderNotHasKeyTest(string $header, string $headerValue): void
     {
@@ -370,6 +736,15 @@ class TestTest extends Test
         $this->assertArrayHasKey($header, $_SERVER);
 
         $this->assertHeaderNotHasKey($header);
+    }
+
+    #[Testing]
+    public function assertHttpBodyNotHasKeyEmptyKeyTest(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(500);
+        $this->expectExceptionMessage('Superglobal key cannot be empty.');
+        $this->assertHttpBodyNotHasKey('');
     }
 
     /**

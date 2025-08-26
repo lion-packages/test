@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Lion\Test;
 
 use Closure;
-use DateTime;
 use DateTimeImmutable;
 use Exception as GlobalException;
 use InvalidArgumentException;
@@ -41,9 +40,9 @@ abstract class Test extends TestCase
     /**
      * Object that will be reflected
      *
-     * @var mixed $instance
+     * @var object $instance
      */
-    private mixed $instance;
+    private object $instance;
 
     /**
      * Exception class
@@ -83,10 +82,7 @@ abstract class Test extends TestCase
      *
      * @return void
      *
-     * @throws ReflectionException If reflection cannot be initialized.
-     *
      * @codeCoverageIgnore
-     * @phpstan-ignore-next-line
      */
     final protected function initReflection(object $instance): void
     {
@@ -208,7 +204,7 @@ abstract class Test extends TestCase
 
         $objects = scandir($dir);
 
-        if ($objects === false) {
+        if (false === $objects) {
             throw new RuntimeException("Unable to read directory: {$dir}.", 500);
         }
 
@@ -245,8 +241,6 @@ abstract class Test extends TestCase
      * @return void
      *
      * @throws RuntimeException If the directory cannot be created.
-     *
-     * @codeCoverageIgnore
      */
     final protected function createDirectory(string $directory): void
     {
@@ -275,8 +269,6 @@ abstract class Test extends TestCase
      *
      * @throws InvalidArgumentException If width or height are invalid.
      * @throws RuntimeException If the image creation or saving fails.
-     *
-     * @codeCoverageIgnore
      */
     final protected function createImage(
         int $width = 100,
@@ -502,9 +494,9 @@ abstract class Test extends TestCase
      *
      * @return void
      *
+     * @throws Exception If validation or instantiation of the exception fails.
      * @throws InvalidArgumentException If the configured exception class does not
      * extend Throwable.
-     * @throws Exception If validation or instantiation of the exception fails.
      */
     final protected function expectLionException(?Closure $callback = null): void
     {
@@ -674,7 +666,7 @@ abstract class Test extends TestCase
      */
     final protected function assertHttpBodyNotHasKey(string $key): void
     {
-        if ($key === '') {
+        if ('' === $key) {
             throw new InvalidArgumentException('Superglobal key cannot be empty.', 500);
         }
 
