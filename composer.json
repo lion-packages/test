@@ -3,6 +3,16 @@
     "description": "Library to implement testing with helpers that allow easy testing with PHPUnit",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://dev.lion-packages.com",
+    "keywords": [
+        "lion",
+        "test",
+        "lion-test"
+    ],
+    "support": {
+        "issues": "https://github.com/lion-packages/test/issues",
+        "source": "https://github.com/lion-packages/test"
+    },
     "autoload": {
         "psr-4": {
             "Lion\\Test\\": "src/LionTest/"
