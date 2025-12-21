@@ -7,6 +7,7 @@ namespace Lion\Test;
 use Closure;
 use DateTimeImmutable;
 use Exception as GlobalException;
+use GdImage;
 use InvalidArgumentException;
 use JsonException;
 use Lion\Exceptions\Exception;
@@ -290,15 +291,13 @@ abstract class Test extends TestCase
 
         $image = imagecreatetruecolor($width, $height);
 
-        if ($image === false) {
+        if (!$image) {
             throw new RuntimeException('Failed to create image resource.', 500);
         }
 
         $white = imagecolorallocate($image, 255, 255, 255);
 
-        if ($white === false) {
-            imagedestroy($image);
-
+        if (!$white) {
             throw new RuntimeException('Failed to allocate color.', 500);
         }
 
@@ -307,12 +306,8 @@ abstract class Test extends TestCase
         $filePath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
 
         if (!imagepng($image, $filePath)) {
-            imagedestroy($image);
-
             throw new RuntimeException("Failed to save image at: {$filePath}.", 500);
         }
-
-        imagedestroy($image);
     }
 
     /**
