@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
       - 4.x
+    paths:
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/php.yml"
+      - "composer.json"
+      - "composer.lock"
+      - "phpunit.xml"
 
 env:
   PHP_VERSION: 8.5
