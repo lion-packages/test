@@ -1,6 +1,6 @@
 {
     "name": "lion/test",
-    "description": "Library to implement testing with helpers that allow easy testing with PHPUnit",
+    "description": "Library to implement testing with helpers that allow easy testing with PHPUnit.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://dev.lion-packages.com",
@@ -24,7 +24,7 @@
         }
     },
     "require": {
-        "php": ">=8.4",
+        "php": ">=8.5",
         "ext-gd": "*"
     },
     "require-dev": {
