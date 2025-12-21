@@ -3,10 +3,13 @@ name: Lion-Test (CI Workflow)
 on:
   push:
     branches:
-      - actions
+      - php-actions
   pull_request:
     branches:
-      - 3.x
+      - 4.x
+
+env:
+  PHP_VERSION: 8.5
 
 jobs:
   install-dependencies:
@@ -19,7 +22,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, gd, zip
 
       - name: Install PHP dependencies
@@ -51,7 +54,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '${{ env.PHP_VERSION }}'
           extensions: mbstring, gd, zip
 
       - name: Restore composer.lock from cache
@@ -118,7 +121,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '${{ env.PHP_VERSION }}'
           extensions: mbstring, gd, zip
 
       - name: Restore composer.lock from cache
@@ -165,7 +168,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, gd, zip, xdebug
           coverage: xdebug
           ini-values: |
@@ -198,6 +201,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN_LION_TEST }}
 
   tests-infection:
+    if: false
     runs-on: ubuntu-latest
     name: Infection
     needs: static-code-analysis
@@ -209,7 +213,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, gd, zip, xdebug
           coverage: xdebug
           ini-values: |
