@@ -738,16 +738,16 @@
         },
         {
             "name": "lion/exceptions",
-            "version": "v3.0.6",
+            "version": "v3.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lion-packages/exceptions.git",
-                "reference": "a8de70f67bbf45f2a9bb67a238694f265ef7bbb3"
+                "reference": "6933f5717fa00bd08cadb20086627604cdec64d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lion-packages/exceptions/zipball/a8de70f67bbf45f2a9bb67a238694f265ef7bbb3",
-                "reference": "a8de70f67bbf45f2a9bb67a238694f265ef7bbb3",
+                "url": "https://api.github.com/repos/lion-packages/exceptions/zipball/6933f5717fa00bd08cadb20086627604cdec64d4",
+                "reference": "6933f5717fa00bd08cadb20086627604cdec64d4",
                 "shasum": ""
             },
             "require": {
@@ -755,11 +755,11 @@
             },
             "require-dev": {
                 "guzzlehttp/guzzle": "^7.9 || ^8.0",
-                "infection/infection": "^0.29.14 || ^0.32.0 || ^0.33.0 || ^0.34.0",
+                "infection/infection": "^0.29.14 || ^0.32.0 || ^0.33.0 || ^0.34.0 || ^0.35.0",
                 "lion/test": "^3.2 || ^4.0",
                 "overtrue/phplint": "^9.5",
                 "phpstan/phpstan": "^2.0",
-                "phpunit/phpunit": "^12.0 || ^13.0",
+                "phpunit/phpunit": "^13.4",
                 "squizlabs/php_codesniffer": "^3.11 || ^4.0"
             },
             "type": "library",
@@ -775,9 +775,10 @@
             "description": "Exception handling and serializations.",
             "support": {
                 "issues": "https://github.com/lion-packages/exceptions/issues",
-                "source": "https://github.com/lion-packages/exceptions/tree/v3.0.6"
+                "source": "https://github.com/lion-packages/exceptions/tree/v3.0.7"
             },
-            "time": "2026-09-08T16:38:55+00:00"
+            "time": "2026-11-17T15:40:17+00:00",
+            "published-time": "2026-11-17T15:40:47+00:00"
         },
         {
             "name": "marc-mabe/php-enum",

@@ -7,7 +7,6 @@ namespace Lion\Test;
 use Closure;
 use DateTimeImmutable;
 use Exception as GlobalException;
-use GdImage;
 use InvalidArgumentException;
 use JsonException;
 use Lion\Exceptions\Exception;
@@ -508,9 +507,9 @@ abstract class Test extends TestCase
             );
 
             $this->expectException($this->exception);
-            $this->expectExceptionMessage($this->exceptionMessage);
+            $this->expectExceptionMessageIs($this->exceptionMessage);
             $this->expectExceptionCode($this->exceptionCode);
-            $this->assertSame($this->exceptionStatus, $lionException->getStatus());
+            $this->assertSame($this->exceptionStatus, $lionException->getResponseStatus());
 
             throw $lionException;
         }
@@ -519,7 +518,7 @@ abstract class Test extends TestCase
             $callback();
         } catch (Exception $e) {
             $this->assertSame($this->exception, $e::class);
-            $this->assertSame($this->exceptionStatus, $e->getStatus());
+            $this->assertSame($this->exceptionStatus, $e->getResponseStatus());
             $this->assertSame($this->exceptionMessage, $e->getMessage());
             $this->assertSame($this->exceptionCode, $e->getCode());
         }
